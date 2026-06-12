@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0060)file:///C:/Users/NANDHU/Downloads/pharmacy_dashboard_11.html -->
+
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -7,8 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>Pharmacy Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com/">
-<link href="./NANDHINI PHARMACY_files/css2" rel="stylesheet">
-<script src="./NANDHINI PHARMACY_files/xlsx.full.min.js.download"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#f4f3ee;--surface:#ffffff;--surface2:#eeede7;--surface3:#e5e4dc;
@@ -201,6 +201,11 @@ table.ledger tr:last-child td{border-bottom:none}
 /* DIVIDER */
 .divider{height:1px;background:var(--border);margin:1rem 0}
 
+/* CASH BOOK */
+.cb-narr{padding:5px 6px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text)}
+.cb-amt{padding:5px 6px;border-bottom:1px solid var(--border);font-size:12px;font-family:var(--mono);text-align:right;white-space:nowrap}
+.cb-amt.pos{color:var(--green)}.cb-amt.neg{color:var(--red)}
+
 /* RESPONSIVE */
 @media(max-width:520px){
   .c3{grid-template-columns:1fr 1fr}
@@ -220,11 +225,11 @@ table.ledger tr:last-child td{border-bottom:none}
     <span class="hdr-logo">💊</span>
     <div>
       <div class="hdr-title">Pharmacy Dashboard</div>
-      <div class="hdr-date" id="hdr-date">Thursday, 4 June 2026</div>
+      <div class="hdr-date" id="hdr-date">Wednesday, 10 June 2026</div>
     </div>
   </div>
   <div class="hdr-right">
-    <div class="sync-pill"><div class="sync-dot ok" id="sync-dot"></div><span id="sync-lbl">☁️ Sync</span></div>
+    <div class="sync-pill"><div class="sync-dot ok" id="sync-dot"></div><span id="sync-lbl">Synced ☁️</span></div>
     <button class="btn-hdr" onclick="exportCSV()">Export</button>
     <button class="btn-hdr" onclick="showPinOverlay()">🔒</button>
   </div>
@@ -232,10 +237,10 @@ table.ledger tr:last-child td{border-bottom:none}
 
 <!-- BALANCE BAR -->
 <div class="bal-bar">
-  <div class="bal-item"><div class="bal-lbl">Cash</div><div class="bal-val" id="bb-cash">₹12,900</div></div>
-  <div class="bal-item"><div class="bal-lbl">IOB Bank</div><div class="bal-val" id="bb-bank">₹20,445</div></div>
-  <div class="bal-item"><div class="bal-lbl">Reserve</div><div class="bal-val" id="bb-reserve">₹23,100</div></div>
-  <div class="bal-item"><div class="bal-lbl">Total</div><div class="bal-val ok" id="bb-total">₹56,445</div></div>
+  <div class="bal-item"><div class="bal-lbl">Cash</div><div class="bal-val" id="bb-cash">₹19,030</div></div>
+  <div class="bal-item"><div class="bal-lbl">IOB Bank</div><div class="bal-val" id="bb-bank">₹6,155</div></div>
+  <div class="bal-item"><div class="bal-lbl">Reserve</div><div class="bal-val" id="bb-reserve">₹39,300</div></div>
+  <div class="bal-item"><div class="bal-lbl">Total</div><div class="bal-val ok" id="bb-total">₹64,485</div></div>
   <div class="bal-item"><div class="bal-lbl">Finance due</div><div class="bal-val ok" id="bb-due">₹0</div></div>
   <div class="bal-item"><div class="bal-lbl">Reserve Days</div><div class="bal-val" id="bb-days">2d</div></div>
 </div>
@@ -244,13 +249,15 @@ table.ledger tr:last-child td{border-bottom:none}
 <div class="nav-tabs">
   <button class="ntab" onclick="switchTab(&#39;dashboard&#39;)">Dashboard</button>
   <button class="ntab" onclick="switchTab(&#39;opening&#39;)">Opening</button>
-  <button class="ntab active" onclick="switchTab(&#39;sales&#39;)">Sales</button>
+  <button class="ntab" onclick="switchTab(&#39;sales&#39;)">Sales</button>
   <button class="ntab" onclick="switchTab(&#39;expenses&#39;)">Expenses</button>
   <button class="ntab" onclick="switchTab(&#39;closing&#39;)">Closing</button>
   <button class="ntab" onclick="switchTab(&#39;finances&#39;)">Finances</button>
   <button class="ntab" onclick="switchTab(&#39;suppliers&#39;)">Suppliers</button>
   <button class="ntab" onclick="switchTab(&#39;investments&#39;)">Investments</button>
   <button class="ntab" onclick="switchTab(&#39;ledger&#39;)">Ledger</button>
+  <button class="ntab active" onclick="switchTab(&#39;weekly-ledger&#39;)">Weekly Ledger</button>
+  <button class="ntab" onclick="switchTab(&#39;cash-book&#39;)">Cash Book</button>
   <button class="ntab" onclick="switchTab(&#39;settings&#39;)">Settings</button>
 </div>
 
@@ -261,14 +268,14 @@ table.ledger tr:last-child td{border-bottom:none}
 
   <!-- Balance overview -->
   <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(140px,1fr))">
-    <div class="metric"><div class="metric-lbl">💵 Cash</div><div class="metric-val green" id="db-cash">₹0</div></div>
-    <div class="metric"><div class="metric-lbl">🏦 Reserve</div><div class="metric-val amber" id="db-reserve">₹0</div></div>
-    <div class="metric"><div class="metric-lbl">🏧 Bank (IOB)</div><div class="metric-val blue" id="db-bank">₹0</div></div>
-    <div class="metric"><div class="metric-lbl">📊 Total</div><div class="metric-val" id="db-total">₹0</div></div>
+    <div class="metric"><div class="metric-lbl">💵 Cash</div><div class="metric-val green" id="db-cash">₹19,030</div></div>
+    <div class="metric"><div class="metric-lbl">🏦 Reserve</div><div class="metric-val amber" id="db-reserve">₹39,300</div></div>
+    <div class="metric"><div class="metric-lbl">🏧 Bank (IOB)</div><div class="metric-val blue" id="db-bank">₹6,155</div></div>
+    <div class="metric"><div class="metric-lbl">📊 Total</div><div class="metric-val" id="db-total">₹64,485</div></div>
   </div>
 
   <!-- Reserve warning -->
-  <div id="db-reserve-warn" style="display:none"></div>
+  <div id="db-reserve-warn" style="display: block;"><div class="alert danger">⚠️ Reserve will run out in <strong>2 day(s)</strong> (₹39,300 ÷ ₹13,200/day). Top up reserve soon.</div></div>
 
   <!-- Monthly sales + target pie -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem" id="db-sales-grid">
@@ -277,13 +284,13 @@ table.ledger tr:last-child td{border-bottom:none}
         Monthly Sales
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="openTargetModal()">✏️ Set Target</button>
       </div>
-      <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--accent)" id="db-monthly-sales">₹0</div>
+      <div style="font-size:28px;font-weight:700;font-family:var(--mono);color:var(--accent)" id="db-monthly-sales">₹42,657</div>
       <div style="margin-top:6px">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Target: <span id="db-target-lbl">Not set</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Target: <span id="db-target-lbl">₹1,50,000</span></div>
         <div class="progress-bar" style="height:8px">
-          <div class="progress-fill" id="db-target-bar" style="width:0%"></div>
+          <div class="progress-fill warn" id="db-target-bar" style="width: 28%;"></div>
         </div>
-        <div style="font-size:12px;color:var(--text2);margin-top:4px"><span id="db-target-pct">0%</span> achieved · <span id="db-target-remaining">—</span> remaining</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px"><span id="db-target-pct">28%</span> achieved · <span id="db-target-remaining">₹1,07,343</span> remaining</div>
       </div>
       <!-- One-time backdated entry -->
       <div class="divider" style="margin:.75rem 0"></div>
@@ -315,40 +322,14 @@ table.ledger tr:last-child td{border-bottom:none}
     </div>
   </div>
 
-  <!-- Pending supplier payments -->
-  <div class="card">
-    <div class="card-title">⚠️ Pending Supplier Payments — due today or overdue</div>
-    <div id="db-pending-suppliers"><div class="empty">Loading…</div></div>
-  </div>
-
-  <!-- Pending finance payments -->
-  <div class="card">
-    <div class="card-title">⏰ Pending Finance Payments — today</div>
-    <div id="db-pending-finance"><div class="empty">Loading…</div></div>
-  </div>
-
-  <!-- Date-wise payment schedule -->
-  <div class="card">
-    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-      📅 Payment Schedule
-      <div style="display:flex;gap:6px">
-        <input type="date" id="db-sched-from" style="padding:4px 6px;border:1px solid var(--border);border-radius:var(--rs);font-size:11px;background:var(--bg)">
-        <span style="font-size:11px;align-self:center">to</span>
-        <input type="date" id="db-sched-to" style="padding:4px 6px;border:1px solid var(--border);border-radius:var(--rs);font-size:11px;background:var(--bg)">
-        <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="renderPaymentSchedule()">Show</button>
-      </div>
-    </div>
-    <div id="db-payment-schedule"><div class="empty">Select a date range and click Show</div></div>
-  </div>
-
 </div>
 
 
 <!-- ═══════════════ OPENING ═══════════════ -->
 <div class="section" id="tab-opening">
-  <div class="sec-hdr"><h2>Morning Opening — <span id="open-date-lbl">Thursday, 4 June</span></h2></div>
+  <div class="sec-hdr"><h2>Morning Opening — <span id="open-date-lbl">Wednesday, 10 June</span></h2></div>
 
-  <div id="open-alerts"><div class="alert warn">⚠️ 6 visible collection(s) due today — ₹5,700 + 🔒 hidden</div></div>
+  <div id="open-alerts"><div class="alert warn">⚠️ 7 visible collection(s) due today — ₹8,700 + 🔒 hidden</div></div>
 
   <!-- Denomination Count -->
   <div class="card">
@@ -357,39 +338,39 @@ table.ledger tr:last-child td{border-bottom:none}
       <thead><tr><th>Note</th><th>Prev. day</th><th>Count today</th><th>Value</th></tr></thead>
       <tbody id="denom-body"><tr>
       <td>₹500</td>
-      <td style="font-family:var(--mono);color:var(--text2)">0 × ₹500 = <strong>₹0</strong></td>
+      <td style="font-family:var(--mono);color:var(--text2)">1 × ₹500 = <strong>₹500</strong></td>
       <td><input type="number" class="denom-input" id="denom-body-500" min="0" value="0" oninput="calcDenomTotal()"></td>
-      <td class="denom-total" id="denom-body-val-500">₹8,000</td>
+      <td class="denom-total" id="denom-body-val-500">₹15,500</td>
     </tr><tr>
       <td>₹200</td>
-      <td style="font-family:var(--mono);color:var(--text2)">0 × ₹200 = <strong>₹0</strong></td>
+      <td style="font-family:var(--mono);color:var(--text2)">1 × ₹200 = <strong>₹200</strong></td>
       <td><input type="number" class="denom-input" id="denom-body-200" min="0" value="0" oninput="calcDenomTotal()"></td>
-      <td class="denom-total" id="denom-body-val-200">₹2,000</td>
+      <td class="denom-total" id="denom-body-val-200">₹800</td>
     </tr><tr>
       <td>₹100</td>
-      <td style="font-family:var(--mono);color:var(--text2)">0 × ₹100 = <strong>₹0</strong></td>
+      <td style="font-family:var(--mono);color:var(--text2)">1 × ₹100 = <strong>₹100</strong></td>
       <td><input type="number" class="denom-input" id="denom-body-100" min="0" value="0" oninput="calcDenomTotal()"></td>
-      <td class="denom-total" id="denom-body-val-100">₹400</td>
+      <td class="denom-total" id="denom-body-val-100">₹2,300</td>
     </tr><tr>
       <td>₹50</td>
       <td style="font-family:var(--mono);color:var(--text2)">0 × ₹50 = <strong>₹0</strong></td>
       <td><input type="number" class="denom-input" id="denom-body-50" min="0" value="0" oninput="calcDenomTotal()"></td>
-      <td class="denom-total" id="denom-body-val-50">₹50</td>
+      <td class="denom-total" id="denom-body-val-50">₹150</td>
     </tr><tr>
       <td>₹20</td>
-      <td style="font-family:var(--mono);color:var(--text2)">0 × ₹20 = <strong>₹0</strong></td>
+      <td style="font-family:var(--mono);color:var(--text2)">3 × ₹20 = <strong>₹60</strong></td>
       <td><input type="number" class="denom-input" id="denom-body-20" min="0" value="0" oninput="calcDenomTotal()"></td>
-      <td class="denom-total" id="denom-body-val-20">₹40</td>
+      <td class="denom-total" id="denom-body-val-20">₹280</td>
     </tr><tr>
       <td>₹10</td>
       <td style="font-family:var(--mono);color:var(--text2)">0 × ₹10 = <strong>₹0</strong></td>
       <td><input type="number" class="denom-input" id="denom-body-10" min="0" value="0" oninput="calcDenomTotal()"></td>
-      <td class="denom-total" id="denom-body-val-10">₹80</td>
+      <td class="denom-total" id="denom-body-val-10">₹0</td>
     </tr></tbody>
       <tfoot>
         <tr style="background:var(--surface2)">
           <td colspan="2" style="font-weight:600;padding:8px">Total counted</td>
-          <td colspan="2" class="denom-total" id="denom-total">₹10,570</td>
+          <td colspan="2" class="denom-total" id="denom-total">₹19,030</td>
         </tr>
       </tfoot>
     </table>
@@ -397,9 +378,9 @@ table.ledger tr:last-child td{border-bottom:none}
     <div class="form-row c3" style="margin-bottom:0">
       <div class="fg"><label>Ledger cash balance (system)</label><input type="text" id="sys-cash-bal" readonly="" style="background:var(--surface2)"></div>
       <div class="fg"><label>Physical count total</label><input type="text" id="phys-cash-total" readonly="" style="background:var(--surface2)"></div>
-      <div class="fg"><label>Difference</label><input type="text" id="cash-diff" readonly="" style="background: var(--surface2); color: var(--red);"></div>
+      <div class="fg"><label>Difference</label><input type="text" id="cash-diff" readonly="" style="background: var(--surface2); color: var(--green);"></div>
     </div>
-    <div id="cash-diff-row" style="display: block; margin-top: 10px;">
+    <div id="cash-diff-row" style="display: none; margin-top: 10px;">
       <div class="fg"><label>Reason for difference</label>
         <select id="cash-diff-reason">
           <option value="">Select reason</option>
@@ -530,6 +511,11 @@ table.ledger tr:last-child td{border-bottom:none}
       <span style="font-size:11px;color:var(--text2)"> days left</span>
     </div>
     <div class="entry">
+      <span class="entry-party"><strong>TKM</strong></span>
+      <span class="badge b-cash">₹3000/day</span>
+      <span style="font-size:11px;color:var(--text2)"> days left</span>
+    </div>
+    <div class="entry">
       <span class="entry-party"><strong>Chit 1 (₹3L)</strong></span>
       <span class="badge b-cash">₹600/day</span>
       <span style="font-size:11px;color:var(--text2)">14 days left</span>
@@ -544,8 +530,8 @@ table.ledger tr:last-child td{border-bottom:none}
       <span class="badge b-cash">₹400/day</span>
       <span style="font-size:11px;color:var(--text2)">9 days left</span>
     </div><div class="entry" style="opacity:.6">
-      <span class="entry-party"><em>+4 hidden collection(s) — unlock via 🔒 to view</em></span>
-      <span class="badge b-transfer">🔒 ₹3,500</span>
+      <span class="entry-party"><em>+6 hidden collection(s) — unlock via 🔒 to view</em></span>
+      <span class="badge b-transfer">🔒 ₹4,500</span>
     </div></div>
   </div>
 
@@ -555,12 +541,12 @@ table.ledger tr:last-child td{border-bottom:none}
 </div>
 
 <!-- ═══════════════ SALES ═══════════════ -->
-<div class="section active" id="tab-sales">
+<div class="section" id="tab-sales">
   <div class="metrics">
-    <div class="metric"><div class="metric-lbl">Cash sales</div><div class="metric-val green" id="ms-cash">₹800</div></div>
-    <div class="metric"><div class="metric-lbl">Online / UPI</div><div class="metric-val blue" id="ms-online">₹3,052</div></div>
-    <div class="metric"><div class="metric-lbl">Total sales</div><div class="metric-val" id="ms-total">₹3,852</div></div>
-    <div class="metric"><div class="metric-lbl">Transactions</div><div class="metric-val amber" id="ms-count">2</div></div>
+    <div class="metric"><div class="metric-lbl">Cash sales</div><div class="metric-val green" id="ms-cash">₹0</div></div>
+    <div class="metric"><div class="metric-lbl">Online / UPI</div><div class="metric-val blue" id="ms-online">₹0</div></div>
+    <div class="metric"><div class="metric-lbl">Total sales</div><div class="metric-val" id="ms-total">₹0</div></div>
+    <div class="metric"><div class="metric-lbl">Transactions</div><div class="metric-val amber" id="ms-count">0</div></div>
   </div>
   <div class="card">
     <div class="card-title">Add sale</div>
@@ -577,21 +563,7 @@ table.ledger tr:last-child td{border-bottom:none}
   </div>
   <div class="card">
     <div class="card-title">Today's sales</div>
-    <div id="sales-list">
-    <div class="entry">
-      <span class="entry-time">21:28</span>
-      <span class="entry-party">Sale</span>
-      <span class="badge b-online">online</span>
-      <span class="entry-amt pos">+₹3,052</span>
-      <button class="del-btn" onclick="deleteEntry(1780588707611)">×</button>
-    </div>
-    <div class="entry">
-      <span class="entry-time">21:28</span>
-      <span class="entry-party">Sale</span>
-      <span class="badge b-cash">cash</span>
-      <span class="entry-amt pos">+₹800</span>
-      <button class="del-btn" onclick="deleteEntry(1780588681147)">×</button>
-    </div></div>
+    <div id="sales-list"><div class="empty">No sales yet today</div></div>
   </div>
 
   <!-- End of day denomination entry -->
@@ -604,7 +576,7 @@ table.ledger tr:last-child td{border-bottom:none}
       <td>₹500</td>
       
       <td><input type="number" class="denom-input" id="eod-denom-body-500" min="0" value="0" oninput="calcEodDenomTotal()"></td>
-      <td class="denom-total" id="eod-denom-body-val-500">₹500</td>
+      <td class="denom-total" id="eod-denom-body-val-500">₹0</td>
     </tr><tr>
       <td>₹200</td>
       
@@ -614,22 +586,22 @@ table.ledger tr:last-child td{border-bottom:none}
       <td>₹100</td>
       
       <td><input type="number" class="denom-input" id="eod-denom-body-100" min="0" value="0" oninput="calcEodDenomTotal()"></td>
-      <td class="denom-total" id="eod-denom-body-val-100">₹100</td>
+      <td class="denom-total" id="eod-denom-body-val-100">₹0</td>
     </tr><tr>
       <td>₹50</td>
       
       <td><input type="number" class="denom-input" id="eod-denom-body-50" min="0" value="0" oninput="calcEodDenomTotal()"></td>
-      <td class="denom-total" id="eod-denom-body-val-50">₹50</td>
+      <td class="denom-total" id="eod-denom-body-val-50">₹0</td>
     </tr><tr>
       <td>₹20</td>
       
       <td><input type="number" class="denom-input" id="eod-denom-body-20" min="0" value="0" oninput="calcEodDenomTotal()"></td>
-      <td class="denom-total" id="eod-denom-body-val-20">₹120</td>
+      <td class="denom-total" id="eod-denom-body-val-20">₹0</td>
     </tr><tr>
       <td>₹10</td>
       
       <td><input type="number" class="denom-input" id="eod-denom-body-10" min="0" value="0" oninput="calcEodDenomTotal()"></td>
-      <td class="denom-total" id="eod-denom-body-val-10">₹30</td>
+      <td class="denom-total" id="eod-denom-body-val-10">₹0</td>
     </tr></tbody>
       <tfoot>
         <tr style="background:var(--surface2)">
@@ -653,7 +625,7 @@ table.ledger tr:last-child td{border-bottom:none}
       <td>₹500</td>
       
       <td><input type="number" class="denom-input" id="eod-reserve-denom-body-500" min="0" value="0" oninput="calcEodReserveDenomTotal()"></td>
-      <td class="denom-total" id="eod-reserve-denom-body-val-500">₹23,000</td>
+      <td class="denom-total" id="eod-reserve-denom-body-val-500">₹0</td>
     </tr><tr>
       <td>₹200</td>
       
@@ -663,7 +635,7 @@ table.ledger tr:last-child td{border-bottom:none}
       <td>₹100</td>
       
       <td><input type="number" class="denom-input" id="eod-reserve-denom-body-100" min="0" value="0" oninput="calcEodReserveDenomTotal()"></td>
-      <td class="denom-total" id="eod-reserve-denom-body-val-100">₹100</td>
+      <td class="denom-total" id="eod-reserve-denom-body-val-100">₹0</td>
     </tr><tr>
       <td>₹50</td>
       
@@ -702,10 +674,10 @@ table.ledger tr:last-child td{border-bottom:none}
 <!-- ═══════════════ EXPENSES ═══════════════ -->
 <div class="section" id="tab-expenses">
   <div class="metrics">
-    <div class="metric"><div class="metric-lbl">Cash paid</div><div class="metric-val red" id="me-cash">₹3,480</div></div>
+    <div class="metric"><div class="metric-lbl">Cash paid</div><div class="metric-val red" id="me-cash">₹13,700</div></div>
     <div class="metric"><div class="metric-lbl">Online paid</div><div class="metric-val red" id="me-online">₹0</div></div>
-    <div class="metric"><div class="metric-lbl">Reserve paid</div><div class="metric-val red" id="me-reserve">₹16,200</div></div>
-    <div class="metric"><div class="metric-lbl">Total expenses</div><div class="metric-val red" id="me-total">₹19,680</div></div>
+    <div class="metric"><div class="metric-lbl">Reserve paid</div><div class="metric-val red" id="me-reserve">₹0</div></div>
+    <div class="metric"><div class="metric-lbl">Total expenses</div><div class="metric-val red" id="me-total">₹13,700</div></div>
   </div>
   <div class="card">
     <div class="card-title">Add expense / supplier / finance payment</div>
@@ -718,15 +690,15 @@ table.ledger tr:last-child td{border-bottom:none}
           <option value="other">Other</option>
         </select>
       </div>
-      <div class="fg" id="e-sup-wrap">
+      <div class="fg" id="e-sup-wrap" style="display: none;">
         <label>Supplier</label>
         <select id="e-sup" onchange="onSupplierSelect()"><option value="">Select supplier</option><option value="s1">BHAVAN TRADERS</option><option value="s2">HR SURGICAL MART</option><option value="s3">JAYASHREE KALYANI AGENCIES</option><option value="s4">MAHAVEER MEDI-SALES PVT LTD</option><option value="s5">MRA ENTERPRISES</option><option value="s6">SHIVANI TRADERS</option><option value="s7">SOLAIMALAI ENTERPRISES</option><option value="s8">SP AGENCIES</option><option value="s9">SRI KAMATCHI AGENCIES</option><option value="s10">SRI PAAHAL ENTERPRISES</option><option value="s1780581598215">SRI SHANMUGA AGENCY</option><option value="s1780581617373">SUBHAM PHARMA DISTRIBUTORS</option><option value="__other__">Other / custom</option></select>
       </div>
-      <div class="fg" id="e-fin-wrap" style="display:none">
-        <label>Finance account <span id="fin-unlock-timer" style="font-size:10px;color:var(--green);margin-left:6px;display:none"></span></label>
+      <div class="fg" id="e-fin-wrap" style="display: block;">
+        <label>Finance account <span id="fin-unlock-timer" style="font-size: 10px; color: var(--green); margin-left: 6px; display: inline;">2:44 remaining</span></label>
         <div style="display:flex;gap:6px;align-items:center">
-          <select id="e-fin" style="flex:1"><option value="">Select finance</option></select>
-          <button class="btn-secondary" id="fin-unlock-btn" onclick="unlockFinanceDropdown()" style="white-space:nowrap;font-size:11px;padding:5px 8px">🔒 Unlock</button>
+          <select id="e-fin" style="flex:1"><option value="">Select finance</option><option value="f1780577956182">Vijaya — ₹1500/day (₹1,03,500 left)</option><option value="f1780578087944">Karpagam — ₹700/day (₹47,600 left)</option><option value="f1780578152137">Venkateshwara — ₹500/day (₹12,500 left)</option><option value="f1780578396346">CM — ₹500/day (₹30,500 left)</option><option value="f1780578454907">sadha — ₹1000/day (₹61,000 left)</option><option value="f1780578508407">venki — ₹1000/day (₹97,000 left)</option><option value="f1780578547316">velan — ₹1000/day (₹32,000 left)</option><option value="f1780578583654">KRISHNA — ₹1000/day (₹50,000 left)</option><option value="f1780671442457">TKM — ₹3000/day (₹2,88,000 left)</option><option value="f1780719911303">sadha 1 — ₹0/day (₹0 left)</option></select>
+          <button class="btn-secondary" id="fin-unlock-btn" onclick="unlockFinanceDropdown()" style="white-space: nowrap; font-size: 11px; padding: 5px 8px; color: var(--green);">🔓 Locks in 2:44</button>
         </div>
       </div>
       <div class="fg" id="e-other-wrap" style="display:none">
@@ -773,21 +745,7 @@ table.ledger tr:last-child td{border-bottom:none}
 
   <div class="card">
     <div class="card-title">Today's expenses</div>
-    <div id="expense-list">
-    <div class="entry">
-      <span class="entry-time">21:23</span>
-      <span class="entry-party">JAYASHREE KALYANI AGENCIES</span>
-      <span class="badge b-cash">cash</span>
-      <span class="entry-amt neg">−₹1,950</span>
-      <button class="del-btn" onclick="deleteEntry(1780588397903)">×</button>
-    </div>
-    <div class="entry">
-      <span class="entry-time">20:30</span>
-      <span class="entry-party">SRI PAAHAL ENTERPRISES</span>
-      <span class="badge b-cash">cash</span>
-      <span class="entry-amt neg">−₹1,530</span>
-      <button class="del-btn" onclick="deleteEntry(1780585251802)">×</button>
-    </div></div>
+    <div id="expense-list"><div class="empty">No expenses yet today</div></div>
   </div>
 </div>
 
@@ -863,6 +821,10 @@ table.ledger tr:last-child td{border-bottom:none}
         <span class="entry-amt neg">₹500</span>
       </div>
       <div class="entry">
+        <span class="entry-party">TKM</span>
+        <span class="entry-amt neg">₹3,000</span>
+      </div>
+      <div class="entry">
         <span class="entry-party">Chit 1 (₹3L)</span>
         <span class="entry-amt neg">₹600</span>
       </div>
@@ -874,8 +836,8 @@ table.ledger tr:last-child td{border-bottom:none}
         <span class="entry-party">Chit 3 (₹2L — School fees)</span>
         <span class="entry-amt neg">₹400</span>
       </div><div class="entry" style="opacity:.6">
-          <span class="entry-party"><em>+4 hidden — 🔒 unlock to view</em></span>
-          <span class="entry-amt neg">₹3,500</span>
+          <span class="entry-party"><em>+6 hidden — 🔒 unlock to view</em></span>
+          <span class="entry-amt neg">₹4,500</span>
         </div></div>
     <div class="divider"></div>
     <div class="form-row c2">
@@ -899,18 +861,21 @@ table.ledger tr:last-child td{border-bottom:none}
     <div id="fin-summary-bar" style="display:flex;gap:10px;flex-wrap:wrap">
     <div class="proj-item">
       <div class="proj-lbl">Visible loans</div>
-      <div class="proj-val red">₹1,83,100</div>
+      <div class="proj-val red">₹4,51,600</div>
     </div>
-    
     <div class="proj-item">
-      <div class="proj-lbl">Visible total</div>
-      <div class="proj-val red">₹1,83,100</div>
+      <div class="proj-lbl">Hidden loans 🔒</div>
+      <div class="proj-val red">₹2,69,500</div>
+    </div>
+    <div class="proj-item">
+      <div class="proj-lbl">Grand total</div>
+      <div class="proj-val red">₹7,21,100</div>
     </div>
     <div class="proj-item">
       <div class="proj-lbl">Today paid</div>
-      <div class="proj-val ok">₹16,200 / ₹9,200</div>
+      <div class="proj-val ok">₹13,700 / ₹13,200</div>
     </div></div>
-    <div style="font-size:11px;color:var(--text3);margin-top:.5rem" id="fin-summary-note">Hidden finance total not shown. Unlock via 🔒 to see full picture.</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:.5rem" id="fin-summary-note">Showing all finances including hidden. Lock when done.</div>
   </div>
   <div class="sec-hdr">
     <h2>Finance accounts</h2>
@@ -927,14 +892,14 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780577956182&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:26%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:31%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹1,50,000</span></div>
       <div>Received <span>₹1,43,000</span></div>
-      <div>Paid days <span>26/100</span></div>
-      <div>Remaining <span>74 days</span></div>
-      <div>Total paid <span>₹39,000</span></div>
-      <div>Remaining amt <span>₹1,11,000</span></div>
+      <div>Paid days <span>31/100</span></div>
+      <div>Remaining <span>69 days</span></div>
+      <div>Total paid <span>₹46,500</span></div>
+      <div>Remaining amt <span>₹1,03,500</span></div>
     </div>
   </div><div class="fin-card">
     <div class="fin-header">
@@ -947,14 +912,14 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578087944&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:27%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:32%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹70,000</span></div>
       <div>Received <span>₹63,000</span></div>
-      <div>Paid days <span>27/100</span></div>
-      <div>Remaining <span>73 days</span></div>
-      <div>Total paid <span>₹18,900</span></div>
-      <div>Remaining amt <span>₹51,100</span></div>
+      <div>Paid days <span>32/100</span></div>
+      <div>Remaining <span>68 days</span></div>
+      <div>Total paid <span>₹22,400</span></div>
+      <div>Remaining amt <span>₹47,600</span></div>
     </div>
   </div><div class="fin-card">
     <div class="fin-header">
@@ -967,14 +932,34 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578152137&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:58%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:75%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹50,000</span></div>
       <div>Received <span>₹45,000</span></div>
-      <div>Paid days <span>58/100</span></div>
-      <div>Remaining <span>42 days</span></div>
-      <div>Total paid <span>₹29,000</span></div>
-      <div>Remaining amt <span>₹21,000</span></div>
+      <div>Paid days <span>75/100</span></div>
+      <div>Remaining <span>25 days</span></div>
+      <div>Total paid <span>₹37,500</span></div>
+      <div>Remaining amt <span>₹12,500</span></div>
+    </div>
+  </div><div class="fin-card">
+    <div class="fin-header">
+      <div>
+        <div class="fin-name">TKM 🔒</div>
+        <div class="fin-meta">₹0 received · ₹3000/day × 100 days · Mon–Sat only</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="badge b-due">Behind</span>
+        <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780671442457&#39;)">Edit</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill " style="width:4%"></div></div>
+    <div class="fin-stats">
+      <div>Borrowed <span>₹0</span></div>
+      <div>Received <span>₹0</span></div>
+      <div>Paid days <span>4/100</span></div>
+      <div>Remaining <span>96 days</span></div>
+      <div>Total paid <span>₹12,000</span></div>
+      <div>Remaining amt <span>₹2,88,000</span></div>
     </div>
   </div></div>
   <div class="divider"></div>
@@ -1035,7 +1020,7 @@ table.ledger tr:last-child td{border-bottom:none}
       </div>
     </div></div>
   <!-- Hidden section trigger -->
-  <div id="hidden-fin-section" style="display: none;">
+  <div id="hidden-fin-section" style="display: block;">
     <div class="divider"></div>
     <div class="sec-hdr">
       <h2 style="color:var(--red)">🔒 Hidden finances</h2>
@@ -1052,14 +1037,14 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578396346&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:34%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:39%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹50,000</span></div>
       <div>Received <span>₹45,000</span></div>
-      <div>Paid days <span>34/100</span></div>
-      <div>Remaining <span>66 days</span></div>
-      <div>Total paid <span>₹17,000</span></div>
-      <div>Remaining amt <span>₹33,000</span></div>
+      <div>Paid days <span>39/100</span></div>
+      <div>Remaining <span>61 days</span></div>
+      <div>Total paid <span>₹19,500</span></div>
+      <div>Remaining amt <span>₹30,500</span></div>
     </div>
   </div><div class="fin-card">
     <div class="fin-header">
@@ -1072,34 +1057,34 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578454907&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:34%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:39%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹10,000</span></div>
       <div>Received <span>₹90,000</span></div>
-      <div>Paid days <span>34/100</span></div>
-      <div>Remaining <span>66 days</span></div>
-      <div>Total paid <span>₹34,000</span></div>
-      <div>Remaining amt <span>₹66,000</span></div>
+      <div>Paid days <span>39/100</span></div>
+      <div>Remaining <span>61 days</span></div>
+      <div>Total paid <span>₹39,000</span></div>
+      <div>Remaining amt <span>₹61,000</span></div>
     </div>
   </div><div class="fin-card">
     <div class="fin-header">
       <div>
         <div class="fin-name">venki 🔒</div>
-        <div class="fin-meta">₹85,000 received · ₹1000/day × 100 days · Collects 7 days</div>
+        <div class="fin-meta">₹88,000 received · ₹1000/day × 100 days · Collects 7 days</div>
       </div>
       <div style="display:flex;gap:6px;align-items:center">
-        <span class="badge b-ok">On track</span>
+        <span class="badge b-due">Behind</span>
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578508407&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill warn" style="width:100%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:4%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹1,00,000</span></div>
-      <div>Received <span>₹85,000</span></div>
-      <div>Paid days <span>100/100</span></div>
-      <div>Remaining <span>0 days</span></div>
-      <div>Total paid <span>₹1,00,000</span></div>
-      <div>Remaining amt <span>₹0</span></div>
+      <div>Received <span>₹88,000</span></div>
+      <div>Paid days <span>4/100</span></div>
+      <div>Remaining <span>96 days</span></div>
+      <div>Total paid <span>₹4,000</span></div>
+      <div>Remaining amt <span>₹96,000</span></div>
     </div>
   </div><div class="fin-card">
     <div class="fin-header">
@@ -1112,14 +1097,14 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578547316&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:62%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:68%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹1,00,000</span></div>
       <div>Received <span>₹87,000</span></div>
-      <div>Paid days <span>62/100</span></div>
-      <div>Remaining <span>38 days</span></div>
-      <div>Total paid <span>₹62,000</span></div>
-      <div>Remaining amt <span>₹38,000</span></div>
+      <div>Paid days <span>68/100</span></div>
+      <div>Remaining <span>32 days</span></div>
+      <div>Total paid <span>₹68,000</span></div>
+      <div>Remaining amt <span>₹32,000</span></div>
     </div>
   </div><div class="fin-card">
     <div class="fin-header">
@@ -1132,14 +1117,34 @@ table.ledger tr:last-child td{border-bottom:none}
         <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780578583654&#39;)">Edit</button>
       </div>
     </div>
-    <div class="progress-bar"><div class="progress-fill " style="width:42%"></div></div>
+    <div class="progress-bar"><div class="progress-fill " style="width:50%"></div></div>
     <div class="fin-stats">
       <div>Borrowed <span>₹1,00,000</span></div>
       <div>Received <span>₹90,000</span></div>
-      <div>Paid days <span>42/100</span></div>
-      <div>Remaining <span>58 days</span></div>
-      <div>Total paid <span>₹42,000</span></div>
-      <div>Remaining amt <span>₹58,000</span></div>
+      <div>Paid days <span>50/100</span></div>
+      <div>Remaining <span>50 days</span></div>
+      <div>Total paid <span>₹50,000</span></div>
+      <div>Remaining amt <span>₹50,000</span></div>
+    </div>
+  </div><div class="fin-card">
+    <div class="fin-header">
+      <div>
+        <div class="fin-name">sadha 1 🔒</div>
+        <div class="fin-meta">₹45,000 received · ₹0/day × 100 days · Mon–Sat only</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="badge b-due">Behind</span>
+        <button class="btn-secondary" style="font-size:11px;padding:4px 8px" onclick="editFinance(&#39;f1780719911303&#39;)">Edit</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill " style="width:30%"></div></div>
+    <div class="fin-stats">
+      <div>Borrowed <span>₹50,000</span></div>
+      <div>Received <span>₹45,000</span></div>
+      <div>Paid days <span>30/100</span></div>
+      <div>Remaining <span>70 days</span></div>
+      <div>Total paid <span>₹0</span></div>
+      <div>Remaining amt <span>₹0</span></div>
     </div>
   </div></div>
     <div class="btn-row" style="margin-top:.5rem">
@@ -1161,262 +1166,208 @@ table.ledger tr:last-child td{border-bottom:none}
     <div class="card-title">Payment forecast — next 30 days</div>
     <div id="sup-forecast">
     <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-06</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300513051]</span>
-      <span class="badge b-due">2d</span>
-      <span class="entry-amt neg">₹2,351</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-06</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300513052]</span>
-      <span class="badge b-due">2d</span>
-      <span class="entry-amt neg">₹628</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-06</span>
-      <span class="entry-party"><strong>MRA ENTERPRISES</strong> [G1765726000800]</span>
-      <span class="badge b-due">2d</span>
-      <span class="entry-amt neg">₹1,188</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-07</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300527482]</span>
-      <span class="badge b-due">3d</span>
-      <span class="entry-amt neg">₹1,009</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-08</span>
-      <span class="entry-party"><strong>BHAVAN TRADERS</strong> [BAA03420]</span>
-      <span class="badge b-due">4d</span>
-      <span class="entry-amt neg">₹6,719</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-08</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300540866]</span>
-      <span class="badge b-due">4d</span>
-      <span class="entry-amt neg">₹1,730</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-08</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300540867]</span>
-      <span class="badge b-due">4d</span>
-      <span class="entry-amt neg">₹1,623</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-08</span>
-      <span class="entry-party"><strong>SHIVANI TRADERS</strong> [ADH00802]</span>
-      <span class="badge b-due">4d</span>
-      <span class="entry-amt neg">₹266</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-09</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300554136]</span>
-      <span class="badge b-due">5d</span>
-      <span class="entry-amt neg">₹5,817</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-09</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300554137]</span>
-      <span class="badge b-due">5d</span>
-      <span class="entry-amt neg">₹751</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-09</span>
-      <span class="entry-party"><strong>SRI KAMATCHI AGENCIES</strong> [JNTL2600609]</span>
-      <span class="badge b-due">5d</span>
-      <span class="entry-amt neg">₹437</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-10</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300568035]</span>
-      <span class="badge b-due">6d</span>
-      <span class="entry-amt neg">₹2,246</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-10</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300568036]</span>
-      <span class="badge b-due">6d</span>
-      <span class="entry-amt neg">₹309</span>
-    </div>
-    <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-11</span>
-      <span class="entry-party"><strong>JAYASHREE KALYANI AGENCIES</strong> [CO01004010]</span>
-      <span class="badge b-due">7d</span>
-      <span class="entry-amt neg">₹1,407</span>
-    </div>
-    <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-11</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300581615]</span>
-      <span class="badge b-due">7d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">1d</span>
       <span class="entry-amt neg">₹175</span>
     </div>
     <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-11</span>
-      <span class="entry-party"><strong>SRI PAAHAL ENTERPRISES</strong> [SPE-1119]</span>
-      <span class="badge b-due">7d</span>
-      <span class="entry-amt neg">₹1,099</span>
-    </div>
-    <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-13</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300602485]</span>
-      <span class="badge b-soon">9d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">3d</span>
       <span class="entry-amt neg">₹4,092</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-13</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300602486]</span>
-      <span class="badge b-soon">9d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">3d</span>
       <span class="entry-amt neg">₹1,512</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-13</span>
       <span class="entry-party"><strong>MRA ENTERPRISES</strong> [BOS2600009]</span>
-      <span class="badge b-soon">9d</span>
+      <span class="badge b-due">3d</span>
       <span class="entry-amt neg">₹667</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-15</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300617541]</span>
-      <span class="badge b-soon">11d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">5d</span>
       <span class="entry-amt neg">₹3,564</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-15</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300617543]</span>
-      <span class="badge b-soon">11d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">5d</span>
       <span class="entry-amt neg">₹568</span>
     </div>
     <div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-15</span>
-      <span class="entry-party"><strong>SOLAIMALAI ENTERPRISES</strong> [SEDPI-26-I006909]</span>
-      <span class="badge b-soon">11d</span>
-      <span class="entry-amt neg">₹2,673</span>
-    </div>
-    <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-16</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300633243]</span>
-      <span class="badge b-soon">12d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">6d</span>
       <span class="entry-amt neg">₹1,945</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-16</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300633244]</span>
-      <span class="badge b-soon">12d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-due">6d</span>
       <span class="entry-amt neg">₹373</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-19</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300659929]</span>
-      <span class="badge b-ok">15d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">9d</span>
       <span class="entry-amt neg">₹3,466</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-19</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300659930]</span>
-      <span class="badge b-ok">15d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">9d</span>
       <span class="entry-amt neg">₹815</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-20</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300681301]</span>
-      <span class="badge b-ok">16d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">10d</span>
       <span class="entry-amt neg">₹1,566</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-20</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300681302]</span>
-      <span class="badge b-ok">16d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">10d</span>
       <span class="entry-amt neg">₹413</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-21</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300695712]</span>
-      <span class="badge b-ok">17d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">11d</span>
       <span class="entry-amt neg">₹2,260</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-21</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300695713]</span>
-      <span class="badge b-ok">17d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">11d</span>
       <span class="entry-amt neg">₹341</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-22</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300709175]</span>
-      <span class="badge b-ok">18d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">12d</span>
       <span class="entry-amt neg">₹1,634</span>
     </div>
     <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-22</span>
+      <span class="entry-party"><strong>SHIVANI TRADERS</strong> [ADH00978]</span>
+      <span class="badge b-soon">12d</span>
+      <span class="entry-amt neg">₹1,995</span>
+    </div>
+    <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-23</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300722351]</span>
-      <span class="badge b-ok">19d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">13d</span>
       <span class="entry-amt neg">₹3,208</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-24</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300735268]</span>
-      <span class="badge b-ok">20d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">14d</span>
       <span class="entry-amt neg">₹9,436</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-24</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300735269]</span>
-      <span class="badge b-ok">20d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-soon">14d</span>
       <span class="entry-amt neg">₹2,317</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-25</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300749045]</span>
-      <span class="badge b-ok">21d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">15d</span>
       <span class="entry-amt neg">₹1,345</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-26</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300756095]</span>
-      <span class="badge b-ok">22d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">16d</span>
       <span class="entry-amt neg">₹1,597</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-27</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300770748]</span>
-      <span class="badge b-ok">23d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">17d</span>
       <span class="entry-amt neg">₹1,937</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-27</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300770749]</span>
-      <span class="badge b-ok">23d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">17d</span>
       <span class="entry-amt neg">₹207</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-28</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300786115]</span>
-      <span class="badge b-ok">24d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">18d</span>
       <span class="entry-amt neg">₹3,392</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-28</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300786116]</span>
-      <span class="badge b-ok">24d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">18d</span>
       <span class="entry-amt neg">₹1,234</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-28</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300786676]</span>
-      <span class="badge b-ok">24d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">18d</span>
       <span class="entry-amt neg">₹4,362</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-29</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300800664]</span>
-      <span class="badge b-ok">25d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">19d</span>
       <span class="entry-amt neg">₹4,155</span>
     </div>
     <div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-29</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300800665]</span>
-      <span class="badge b-ok">25d</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">19d</span>
       <span class="entry-amt neg">₹624</span>
+    </div>
+    <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-30</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">20d</span>
+      <span class="entry-amt neg">₹2,907</span>
+    </div>
+    <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-30</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">20d</span>
+      <span class="entry-amt neg">₹548</span>
+    </div>
+    <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-07-02</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">22d</span>
+      <span class="entry-amt neg">₹2,792</span>
+    </div>
+    <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-07-02</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">22d</span>
+      <span class="entry-amt neg">₹101</span>
+    </div>
+    <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-07-04</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">24d</span>
+      <span class="entry-amt neg">₹3,256</span>
+    </div>
+    <div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-07-04</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="badge b-ok">24d</span>
+      <span class="entry-amt neg">₹586</span>
     </div></div>
   </div>
 
@@ -1440,55 +1391,55 @@ table.ledger tr:last-child td{border-bottom:none}
     <div class="divider"></div>
     <div class="card-title no-mb" style="margin-bottom:.6rem">Recent invoices</div>
     <div id="recent-invoices-list"><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-09</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="entry-amt neg">₹3,256</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290634&#39;)" title="Delete">×</button>
+    </div><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-09</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="entry-amt neg">₹586</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290635&#39;)" title="Delete">×</button>
+    </div><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-09</span>
+      <span class="entry-party"><strong>SHIVANI TRADERS</strong> [ADH00978]</span>
+      <span class="entry-amt neg">₹1,995</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290638&#39;)" title="Delete">×</button>
+    </div><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-07</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="entry-amt neg">₹2,792</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290632&#39;)" title="Delete">×</button>
+    </div><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-07</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="entry-amt neg">₹101</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290633&#39;)" title="Delete">×</button>
+    </div><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-05</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="entry-amt neg">₹2,907</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290630&#39;)" title="Delete">×</button>
+    </div><div class="entry">
+      <span class="entry-time mono" style="min-width:80px">2026-06-05</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
+      <span class="entry-amt neg">₹548</span>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290631&#39;)" title="Delete">×</button>
+    </div><div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-04</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300800664]</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
       <span class="entry-amt neg">₹4,155</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466044&#39;)" title="Delete">×</button>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290628&#39;)" title="Delete">×</button>
     </div><div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-04</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300800665]</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
       <span class="entry-amt neg">₹624</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466045&#39;)" title="Delete">×</button>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290629&#39;)" title="Delete">×</button>
     </div><div class="entry">
       <span class="entry-time mono" style="min-width:80px">2026-06-03</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300786115]</span>
+      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [2.60007E+14]</span>
       <span class="entry-amt neg">₹3,392</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466041&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-03</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300786116]</span>
-      <span class="entry-amt neg">₹1,234</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466042&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-03</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300786676]</span>
-      <span class="entry-amt neg">₹4,362</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466043&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-02</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300770748]</span>
-      <span class="entry-amt neg">₹1,937</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466039&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-02</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300770749]</span>
-      <span class="entry-amt neg">₹207</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466040&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-02</span>
-      <span class="entry-party"><strong>MRA ENTERPRISES</strong> [BOS2600009]</span>
-      <span class="entry-amt neg">₹667</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466048&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-01</span>
-      <span class="entry-party"><strong>BHAVAN TRADERS</strong> [BAA03420]</span>
-      <span class="entry-amt neg">₹6,719</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv17805825046600&#39;)" title="Delete">×</button>
-    </div><div class="entry">
-      <span class="entry-time mono" style="min-width:80px">2026-06-01</span>
-      <span class="entry-party"><strong>MAHAVEER MEDI-SALES PVT LTD</strong> [260007300756095]</span>
-      <span class="entry-amt neg">₹1,597</span>
-      <button class="del-btn" onclick="deleteInvoice(&#39;inv178058250466038&#39;)" title="Delete">×</button>
+      <button class="del-btn" onclick="deleteInvoice(&#39;inv178100928290625&#39;)" title="Delete">×</button>
     </div></div>
   </div>
 
@@ -1502,9 +1453,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>7 days</td>
       <td>Mon</td>
-      <td class="mono">₹6,719</td>
-      <td class="mono">2026-06-08</td>
-      <td><span class="badge b-soon">Due in 4d</span></td>
+      <td class="mono">₹0</td>
+      <td class="mono">—</td>
+      <td></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s1&#39;)">Edit</button>
       </td>
@@ -1524,9 +1475,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>21 days</td>
       <td>Thu</td>
-      <td class="mono">₹3</td>
-      <td class="mono">2026-06-11</td>
-      <td><span class="badge b-soon">Due in 7d</span></td>
+      <td class="mono">₹0</td>
+      <td class="mono">—</td>
+      <td></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s3&#39;)">Edit</button>
       </td>
@@ -1535,9 +1486,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>25 days</td>
       <td>By invoice date</td>
-      <td class="mono">₹91,043</td>
-      <td class="mono">2026-06-29</td>
-      <td><span class="badge b-ok">25d left</span></td>
+      <td class="mono">₹75,851</td>
+      <td class="mono">2026-07-04</td>
+      <td><span class="badge b-ok">24d left</span></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s4&#39;)">Edit</button>
       </td>
@@ -1546,9 +1497,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>7 days</td>
       <td>Sat</td>
-      <td class="mono">₹2,858</td>
+      <td class="mono">₹1,855</td>
       <td class="mono">2026-06-13</td>
-      <td><span class="badge b-ok">9d left</span></td>
+      <td><span class="badge b-soon">Due in 3d</span></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s5&#39;)">Edit</button>
       </td>
@@ -1557,9 +1508,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>7 days</td>
       <td>Mon</td>
-      <td class="mono">₹266</td>
-      <td class="mono">2026-06-08</td>
-      <td><span class="badge b-soon">Due in 4d</span></td>
+      <td class="mono">₹1,995</td>
+      <td class="mono">2026-06-22</td>
+      <td><span class="badge b-ok">12d left</span></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s6&#39;)">Edit</button>
       </td>
@@ -1568,9 +1519,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>14 days</td>
       <td>Mon</td>
-      <td class="mono">₹2,673</td>
-      <td class="mono">2026-06-15</td>
-      <td><span class="badge b-ok">11d left</span></td>
+      <td class="mono">₹0</td>
+      <td class="mono">—</td>
+      <td></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s7&#39;)">Edit</button>
       </td>
@@ -1590,9 +1541,9 @@ table.ledger tr:last-child td{border-bottom:none}
       </td>
       <td>14 days</td>
       <td>Tue</td>
-      <td class="mono">₹437</td>
-      <td class="mono">2026-06-09</td>
-      <td><span class="badge b-soon">Due in 5d</span></td>
+      <td class="mono">₹0</td>
+      <td class="mono">—</td>
+      <td></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s9&#39;)">Edit</button>
       </td>
@@ -1625,7 +1576,7 @@ table.ledger tr:last-child td{border-bottom:none}
       <td>By invoice date</td>
       <td class="mono">₹978</td>
       <td class="mono">2026-08-02</td>
-      <td><span class="badge b-ok">59d left</span></td>
+      <td><span class="badge b-ok">53d left</span></td>
       <td>
         <button class="btn-secondary" style="font-size:11px;padding:3px 8px" onclick="editSupplier(&#39;s1780581617373&#39;)">Edit</button>
       </td>
@@ -1669,77 +1620,50 @@ table.ledger tr:last-child td{border-bottom:none}
       <table class="ledger">
         <thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Party / Note</th><th>Mode</th><th style="text-align:right">Amount</th><th></th></tr></thead>
         <tbody id="ledger-body"><tr>
-      <td class="mono">2026-06-04</td><td class="mono">21:28</td>
-      <td><span class="badge b-sale">sale</span></td>
-      <td>Sale</td>
-      <td><span class="badge b-cash">cash</span></td>
-      <td class="mono" style="text-align:right;color:var(--green)">
-        +₹800
-      </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780588681147)">×</button></td>
-    </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">21:28</td>
-      <td><span class="badge b-sale">sale</span></td>
-      <td>Sale</td>
-      <td><span class="badge b-online">online</span></td>
-      <td class="mono" style="text-align:right;color:var(--green)">
-        +₹3,052
-      </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780588707611)">×</button></td>
-    </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">21:23</td>
-      <td><span class="badge b-expense">expense</span></td>
-      <td>JAYASHREE KALYANI AGENCIES</td>
+      <td class="mono">2026-06-10</td><td class="mono">18:18</td>
+      <td><span class="badge b-finance">finance</span></td>
+      <td>Finance — TKM</td>
       <td><span class="badge b-cash">cash</span></td>
       <td class="mono" style="text-align:right;color:var(--red)">
-        −₹1,950
+        −₹3,000
       </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780588397903)">×</button></td>
+      <td><button class="del-btn" onclick="deleteEntry(1781095694486)">×</button></td>
     </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">20:32</td>
+      <td class="mono">2026-06-10</td><td class="mono">17:38</td>
       <td><span class="badge b-finance">finance</span></td>
-      <td>Finance — Venkateshwara</td>
-      <td><span class="badge b-reserve">reserve</span></td>
+      <td>Finance — TKM</td>
+      <td><span class="badge b-cash">cash</span></td>
       <td class="mono" style="text-align:right;color:var(--red)">
-        −₹500
+        −₹3,000
       </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780585324813)">×</button></td>
+      <td><button class="del-btn" onclick="deleteEntry(1781093317263)">×</button></td>
     </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">20:32</td>
-      <td><span class="badge b-finance">finance</span></td>
-      <td>Finance — Venkateshwara</td>
-      <td><span class="badge b-reserve">reserve</span></td>
-      <td class="mono" style="text-align:right;color:var(--red)">
-        −₹1,500
-      </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780585338026)">×</button></td>
-    </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">20:31</td>
+      <td class="mono">2026-06-10</td><td class="mono">17:32</td>
       <td><span class="badge b-finance">finance</span></td>
       <td>Finance — Vijaya</td>
-      <td><span class="badge b-reserve">reserve</span></td>
+      <td><span class="badge b-cash">cash</span></td>
       <td class="mono" style="text-align:right;color:var(--red)">
         −₹1,500
       </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780585308083)">×</button></td>
+      <td><button class="del-btn" onclick="deleteEntry(1781092939139)">×</button></td>
     </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">20:31</td>
+      <td class="mono">2026-06-10</td><td class="mono">17:32</td>
       <td><span class="badge b-finance">finance</span></td>
       <td>Finance — Karpagam</td>
-      <td><span class="badge b-reserve">reserve</span></td>
+      <td><span class="badge b-cash">cash</span></td>
       <td class="mono" style="text-align:right;color:var(--red)">
         −₹700
       </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780585317586)">×</button></td>
+      <td><button class="del-btn" onclick="deleteEntry(1781092946430)">×</button></td>
     </tr><tr>
-      <td class="mono">2026-06-04</td><td class="mono">20:30</td>
-      <td><span class="badge b-expense">expense</span></td>
-      <td>SRI PAAHAL ENTERPRISES</td>
+      <td class="mono">2026-06-10</td><td class="mono">17:32</td>
+      <td><span class="badge b-finance">finance</span></td>
+      <td>Finance — Venkateshwara</td>
       <td><span class="badge b-cash">cash</span></td>
       <td class="mono" style="text-align:right;color:var(--red)">
-        −₹1,530
+        −₹2,000
       </td>
-      <td><button class="del-btn" onclick="deleteEntry(1780585251802)">×</button></td>
+      <td><button class="del-btn" onclick="deleteEntry(1781092952341)">×</button></td>
     </tr></tbody>
       </table>
     </div>
@@ -1747,7 +1671,531 @@ table.ledger tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- ═══════════════ WEEKLY LEDGER ═══════════════ -->
+<div class="section active" id="tab-weekly-ledger">
+
+<style>
+.wl-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.wl-req-box{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--rs);padding:12px 18px;min-width:220px}
+.wl-req-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.wl-req-val{font-size:22px;font-weight:700;font-family:var(--mono)}
+.wl-req-val.neg{color:var(--red)}
+.wl-req-val.pos{color:var(--green)}
+.wl-bal-bar{display:flex;gap:8px;flex-wrap:wrap}
+.wl-bc{background:var(--surface2);border-radius:var(--rs);padding:8px 14px}
+.wl-bc-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.3px}
+.wl-bc-val{font-size:15px;font-weight:600;font-family:var(--mono);color:var(--text)}
+.wl-bc-val.neg{color:var(--red)}
+.wl-bc-val.pos{color:var(--green)}
+.wl-tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--rs);margin-top:4px}
+table.wlt{border-collapse:collapse;min-width:100%;font-size:12px}
+table.wlt thead th{background:var(--surface2);padding:7px 10px;text-align:center;font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;border-bottom:1px solid var(--border);border-right:1px solid var(--border);position:sticky;top:0;z-index:2}
+table.wlt thead th.today-hdr{background:#e8f4fd;color:#1565c0}
+table.wlt thead th.past-hdr{background:var(--surface2);color:var(--text3)}
+table.wlt td{padding:5px 10px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);white-space:nowrap;text-align:center;font-size:12px;color:var(--text2)}
+table.wlt td.row-lbl{text-align:left;font-weight:500;color:var(--text);position:sticky;left:0;background:var(--bg);z-index:1;min-width:110px;font-size:12px}
+table.wlt thead th.row-lbl-hdr{position:sticky;left:0;z-index:3;text-align:left;min-width:110px}
+table.wlt td.paid-cell{background:#f0faf4;color:var(--green);font-style:italic;font-size:11px}
+table.wlt td.pending-cell{font-weight:600;color:var(--text);cursor:pointer}
+table.wlt td.pending-cell:hover{background:var(--surface2)}
+table.wlt tr.total-row td{background:var(--surface2);font-weight:700;border-top:2px solid var(--border2);color:var(--text)}
+table.wlt tr.total-row td.row-lbl{background:var(--surface2)}
+table.wlt tr.avail-row td{font-size:11px;font-weight:600;border-top:none}
+table.wlt tr.avail-row td.pos{color:var(--green)}
+table.wlt tr.avail-row td.neg{color:var(--red)}
+table.wlt tr.avail-row td.row-lbl{background:var(--bg)}
+table.wlt td.c-moved{background:#FAEEDA;color:#633806;font-size:11px;cursor:pointer}
+table.wlt td.c-empty{color:var(--text3)}
+table.wlt td.c-missed-stay{background:#FCEBEB;color:#A32D2D;font-weight:500;cursor:pointer}
+table.wlt tr.total-row td.today-col{background:#e8f4fd}
+.wl-legend{display:flex;gap:14px;font-size:11px;color:var(--text3);margin-bottom:8px}
+.wl-legend span{display:flex;align-items:center;gap:4px}
+.wl-legend .dot{width:10px;height:10px;border-radius:2px;display:inline-block}
+</style>
+
+  <div class="sec-hdr"><h2>Weekly Payment Ledger — <span id="wl-month-label">June 2026</span></h2></div>
+
+  <!-- Missed payment banner -->
+  <div id="wl-missed-banner" style="display:none;background:#FCEBEB;border:1px solid #F09595;border-radius:var(--rs);padding:10px 14px;margin-bottom:10px;align-items:center;justify-content:space-between;gap:10px">
+    <span class="wl-banner-txt" style="font-size:12px;color:#A32D2D;font-weight:600">Missed payments need attention</span>
+    <button class="btn-secondary" style="font-size:12px;padding:5px 12px;color:#A32D2D;border-color:#F09595" onclick="wlOpenMissedReview()">Review now</button>
+  </div>
+
+  <!-- Dialog area -->
+  <div id="wl-dialog-area"></div>
+
+  <!-- Month requirement + balance summary -->
+  <div class="wl-top">
+    <div class="wl-req-box">
+      <div class="wl-req-lbl">Total requirement (month)</div>
+      <div class="wl-req-val neg" id="wl-req-total">₹2,49,514</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px" id="wl-req-note">Total this month: ₹2,68,914 | Paid: ₹19,400</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:500">Current balances</div>
+      <div class="wl-bal-bar">
+        <div class="wl-bc"><div class="wl-bc-lbl">Cash</div><div class="wl-bc-val" id="wl-cash-val">₹19,030</div></div>
+        <div class="wl-bc"><div class="wl-bc-lbl">Bank / Account</div><div class="wl-bc-val" id="wl-bank-val">₹6,155</div></div>
+        <div class="wl-bc"><div class="wl-bc-lbl">Reserve</div><div class="wl-bc-val" id="wl-reserve-val">₹39,300</div></div>
+        <div class="wl-bc" style="border:1px solid var(--border2)"><div class="wl-bc-lbl">Total available</div><div class="wl-bc-val" id="wl-total-avail">₹64,485</div></div>
+        <div class="wl-bc"><div class="wl-bc-lbl">After all payments</div><div class="wl-bc-val neg" id="wl-after-all">₹1,85,029 deficit</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wl-legend">
+    <span><span class="dot" style="background:#d4edda"></span>Paid — cleared</span>
+    <span><span class="dot" style="background:#fff3cd"></span>Pending — tap to mark paid</span>
+    <span><span class="dot" style="background:#f8f9fa"></span>No payment today</span>
+  </div>
+
+  <!-- The ledger table -->
+  <div class="wl-tbl-wrap">
+    <table class="wlt" id="wl-table"><thead><tr><th class="row-lbl-hdr">Payee</th><th class="">9<br><span style="font-weight:400;font-size:10px">Tue</span></th><th class="today-hdr">10<br><span style="font-weight:400;font-size:10px">Wed</span></th><th class="">11<br><span style="font-weight:400;font-size:10px">Thu</span></th><th class="">12<br><span style="font-weight:400;font-size:10px">Fri</span></th><th class="">13<br><span style="font-weight:400;font-size:10px">Sat</span></th><th class="">14<br><span style="font-weight:400;font-size:10px">Sun</span></th><th class="">15<br><span style="font-weight:400;font-size:10px">Mon</span></th><th class="">16<br><span style="font-weight:400;font-size:10px">Tue</span></th><th class="">17<br><span style="font-weight:400;font-size:10px">Wed</span></th><th class="">18<br><span style="font-weight:400;font-size:10px">Thu</span></th><th class="">19<br><span style="font-weight:400;font-size:10px">Fri</span></th><th class="">20<br><span style="font-weight:400;font-size:10px">Sat</span></th><th class="">21<br><span style="font-weight:400;font-size:10px">Sun</span></th><th class="">22<br><span style="font-weight:400;font-size:10px">Mon</span></th><th class="">23<br><span style="font-weight:400;font-size:10px">Tue</span></th><th class="">24<br><span style="font-weight:400;font-size:10px">Wed</span></th><th class="">25<br><span style="font-weight:400;font-size:10px">Thu</span></th><th class="">26<br><span style="font-weight:400;font-size:10px">Fri</span></th><th class="">27<br><span style="font-weight:400;font-size:10px">Sat</span></th><th class="">28<br><span style="font-weight:400;font-size:10px">Sun</span></th><th class="">29<br><span style="font-weight:400;font-size:10px">Mon</span></th></tr></thead><tbody><tr><td class="row-lbl">Vijaya</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-11&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-12&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-13&#39;)">₹1,500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-15&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-16&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-17&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-18&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-19&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-20&#39;)">₹1,500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-22&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-23&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-24&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-25&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-26&#39;)">₹1,500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-27&#39;)">₹1,500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780577956182&#39;,&#39;2026-06-29&#39;)">₹1,500</td></tr><tr><td class="row-lbl">Karpagam</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-11&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-12&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-13&#39;)">₹700</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-15&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-16&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-17&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-18&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-19&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-20&#39;)">₹700</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-22&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-23&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-24&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-25&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-26&#39;)">₹700</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-27&#39;)">₹700</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578087944&#39;,&#39;2026-06-29&#39;)">₹700</td></tr><tr><td class="row-lbl">Venkateshwara</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-11&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-12&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-13&#39;)">₹500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-15&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-16&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-17&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-18&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-19&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-20&#39;)">₹500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-22&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-23&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-24&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-25&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-26&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-27&#39;)">₹500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578152137&#39;,&#39;2026-06-29&#39;)">₹500</td></tr><tr><td class="row-lbl">CM 🔒</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-11&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-12&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-13&#39;)">₹500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-15&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-16&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-17&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-18&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-19&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-20&#39;)">₹500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-22&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-23&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-24&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-25&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-26&#39;)">₹500</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-27&#39;)">₹500</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578396346&#39;,&#39;2026-06-29&#39;)">₹500</td></tr><tr><td class="row-lbl">sadha 🔒</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-11&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-12&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-13&#39;)">₹1,000</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-15&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-16&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-17&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-18&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-19&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-20&#39;)">₹1,000</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-22&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-23&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-24&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-25&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-26&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-27&#39;)">₹1,000</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578454907&#39;,&#39;2026-06-29&#39;)">₹1,000</td></tr><tr><td class="row-lbl">venki 🔒</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-11&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-12&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-13&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-14&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-15&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-16&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-17&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-18&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-19&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-20&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-21&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-22&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-23&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-24&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-25&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-26&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-27&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-28&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578508407&#39;,&#39;2026-06-29&#39;)">₹1,000</td></tr><tr><td class="row-lbl">velan 🔒</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-11&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-12&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-13&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-14&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-15&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-16&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-17&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-18&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-19&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-20&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-21&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-22&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-23&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-24&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-25&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-26&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-27&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-28&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578547316&#39;,&#39;2026-06-29&#39;)">₹1,000</td></tr><tr><td class="row-lbl">KRISHNA 🔒</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="pending-cell today-col" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-10&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-11&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-12&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-13&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-14&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-15&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-16&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-17&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-18&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-19&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-20&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-21&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-22&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-23&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-24&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-25&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-26&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-27&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-28&#39;)">₹1,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780578583654&#39;,&#39;2026-06-29&#39;)">₹1,000</td></tr><tr><td class="row-lbl">TKM</td><td class="paid-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-09&#39;)">✓ paid</td><td class="paid-cell today-col" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-10&#39;)">✓ paid</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-11&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-12&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-13&#39;)">₹3,000</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-15&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-16&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-17&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-18&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-19&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-20&#39;)">₹3,000</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-22&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-23&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-24&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-25&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-26&#39;)">₹3,000</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-27&#39;)">₹3,000</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;f1780671442457&#39;,&#39;2026-06-29&#39;)">₹3,000</td></tr><tr><td class="row-lbl">sadha 1 🔒</td><td class="c-empty">—</td><td class="c-empty today-col">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td></tr><tr><td class="row-lbl">MAHAVEER MEDI-SALES PVT LTD</td><td class="c-moved" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-09&#39;)">moved</td><td class="pending-cell today-col" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-10&#39;)">₹9,123</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-11&#39;)">₹175</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-13&#39;)">₹5,604</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-15&#39;)">₹4,132</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-16&#39;)">₹2,318</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-19&#39;)">₹4,281</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-20&#39;)">₹1,979</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-21&#39;)">₹2,601</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-22&#39;)">₹1,634</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-23&#39;)">₹3,208</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-24&#39;)">₹11,753</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-25&#39;)">₹1,345</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-26&#39;)">₹1,597</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-27&#39;)">₹2,144</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-28&#39;)">₹8,988</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s4&#39;,&#39;2026-06-29&#39;)">₹4,779</td></tr><tr><td class="row-lbl">MRA ENTERPRISES</td><td class="c-moved" onclick="wlOpenDialog(&#39;sup_s5&#39;,&#39;2026-06-09&#39;)">moved</td><td class="c-empty today-col">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s5&#39;,&#39;2026-06-13&#39;)">₹667</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td></tr><tr><td class="row-lbl">SHIVANI TRADERS</td><td class="c-empty">—</td><td class="c-empty today-col">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s6&#39;,&#39;2026-06-16&#39;)">₹1,995</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td></tr><tr><td class="row-lbl">SP AGENCIES</td><td class="c-empty">—</td><td class="c-empty today-col">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td></tr><tr><td class="row-lbl">SRI SHANMUGA AGENCY</td><td class="c-empty">—</td><td class="c-empty today-col">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="pending-cell" onclick="wlOpenDialog(&#39;sup_s1780581598215&#39;,&#39;2026-06-24&#39;)">₹756</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td></tr><tr><td class="row-lbl">SUBHAM PHARMA DISTRIBUTORS</td><td class="c-empty">—</td><td class="c-empty today-col">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td><td class="c-empty">—</td></tr><tr class="total-row"><td class="row-lbl">Daily total</td><td class="">—</td><td class="today-col">₹10,123</td><td class="">₹10,375</td><td class="">₹10,200</td><td class="">₹16,471</td><td class="">₹3,000</td><td class="">₹14,332</td><td class="">₹14,513</td><td class="">₹10,200</td><td class="">₹10,200</td><td class="">₹14,481</td><td class="">₹12,179</td><td class="">₹5,601</td><td class="">₹11,834</td><td class="">₹13,408</td><td class="">₹22,709</td><td class="">₹11,545</td><td class="">₹11,797</td><td class="">₹12,344</td><td class="">₹11,988</td><td class="">₹14,979</td></tr><tr class="avail-row"><td class="row-lbl">Balance after</td><td class="pos">₹64,485 ▲</td><td class="pos today-col">₹54,362 ▲</td><td class="pos">₹43,987 ▲</td><td class="pos">₹33,787 ▲</td><td class="pos">₹17,316 ▲</td><td class="pos">₹14,316 ▲</td><td class="neg">₹16 ▼</td><td class="neg">₹14,529 ▼</td><td class="neg">₹24,729 ▼</td><td class="neg">₹34,929 ▼</td><td class="neg">₹49,410 ▼</td><td class="neg">₹61,589 ▼</td><td class="neg">₹67,190 ▼</td><td class="neg">₹79,024 ▼</td><td class="neg">₹92,432 ▼</td><td class="neg">₹1,15,141 ▼</td><td class="neg">₹1,26,686 ▼</td><td class="neg">₹1,38,483 ▼</td><td class="neg">₹1,50,827 ▼</td><td class="neg">₹1,62,815 ▼</td><td class="neg">₹1,77,794 ▼</td></tr></tbody></table>
+  </div>
+
+  <div style="margin-top:10px;font-size:11px;color:var(--text3)">
+    Data is pulled live from your Finances, Chits, and Suppliers tabs — no hardcoded values.<br>
+    🔒 Hidden finance payees show amounts only when unlocked via PIN. Tap any pending amount to mark it paid — totals and balances recalculate instantly.
+  </div>
+
+</div>
+
 <!-- ═══════════════ SETTINGS ═══════════════ -->
+<!-- ═══════════════ CASH BOOK ═══════════════ -->
+<div class="section" id="tab-cash-book">
+  <div class="sec-hdr">
+    <h2>📒 Daily Cash Book</h2>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="fg" style="margin-bottom:0">
+        <input type="month" id="cb-month" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--rs);font-size:12px;background:var(--bg);color:var(--text)" onchange="renderCashBook()">
+      </div>
+      <button class="btn-secondary" onclick="cbGoToday()">Today</button>
+    </div>
+  </div>
+
+  <!-- Month summary bar -->
+  <div class="metrics" id="cb-month-metrics" style="margin-bottom:1rem">
+      <div class="metric"><div class="metric-lbl">Month Sales</div><div class="metric-val green">₹42,657</div></div>
+      <div class="metric"><div class="metric-lbl">Month Expenses</div><div class="metric-val red">₹45,563</div></div>
+      <div class="metric"><div class="metric-lbl">Finance Paid</div><div class="metric-val amber">₹34,500</div></div>
+      <div class="metric"><div class="metric-lbl">Net</div><div class="metric-val red">₹-37,406</div></div>
+    </div>
+
+  <!-- Daily entries -->
+  <div id="cb-days-container">
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Monday, 1 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)">
+          Net: +₹6,663
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹6,150</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹513</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹6,663</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr" style="color:var(--text3)">No expenses</td><td></td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹0</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹6,663
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹6,663 &nbsp;|&nbsp; Out: ₹0 &nbsp;|&nbsp; Net: <strong style="color:var(--green)">+₹6,663</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Tuesday, 2 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)">
+          Net: +₹3,764
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹1,850</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹1,914</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹3,764</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr" style="color:var(--text3)">No expenses</td><td></td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹0</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹3,764
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹3,764 &nbsp;|&nbsp; Out: ₹0 &nbsp;|&nbsp; Net: <strong style="color:var(--green)">+₹3,764</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Wednesday, 3 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)">
+          Net: +₹11,723
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹10,530</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹1,193</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹11,723</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr" style="color:var(--text3)">No expenses</td><td></td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹0</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹11,723
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹11,723 &nbsp;|&nbsp; Out: ₹0 &nbsp;|&nbsp; Net: <strong style="color:var(--green)">+₹11,723</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Thursday, 4 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">
+          Net: ₹-3,828
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹800</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹3,052</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹3,852</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">SRI PAAHAL ENTERPRISES<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹1,530</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Vijaya<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Karpagam<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹700</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹500</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr">JAYASHREE KALYANI AGENCIES<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹1,950</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹7,680</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹3,828
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹3,852 &nbsp;|&nbsp; Out: ₹7,680 &nbsp;|&nbsp; Net: <strong style="color:var(--red)">₹-3,828</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Friday, 5 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">
+          Net: ₹-23,099
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹1,900</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹1,767</td></tr><tr><td class="cb-narr">Transfer — Transfer</td><td class="cb-amt" style="color:var(--amber)">₹16,000</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹3,667</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Vijaya<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹2,000</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Karpagam<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹700</td></tr><tr><td class="cb-narr">HR SURGICAL MART<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹1,544</td></tr><tr><td class="cb-narr">SRI PAAHAL ENTERPRISES<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹435</td></tr><tr><td class="cb-narr">MAHAVEER MEDI-SALES PVT LTD<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹18,041</td></tr><tr><td class="cb-narr">JAYASHREE KALYANI AGENCIES<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹546</td></tr><tr><td class="cb-narr">savithiri salary<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹2,000</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹26,766</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹23,099
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹3,667 &nbsp;|&nbsp; Out: ₹26,766 &nbsp;|&nbsp; Net: <strong style="color:var(--red)">₹-23,099</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Saturday, 6 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">
+          Net: ₹-14,315
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹3,920</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹2,121</td></tr><tr><td class="cb-narr">Transfer — Transfer</td><td class="cb-amt" style="color:var(--amber)">₹13,400</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹6,041</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Vijaya<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹2,000</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Karpagam<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹700</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — TKM<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹3,000</td></tr><tr><td class="cb-narr">MRA ENTERPRISES<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹1,003</td></tr><tr><td class="cb-narr">BHAVAN TRADERS<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹6,719</td></tr><tr><td class="cb-narr">NARENDRAN<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹1,620</td></tr><tr><td class="cb-narr">MAHAVEER MEDI-SALES PVT LTD<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹2,979</td></tr><tr><td class="cb-narr">Bank adj — Personal expense</td><td class="cb-amt neg">₹762</td></tr><tr><td class="cb-narr">Bank adj — Personal expense</td><td class="cb-amt neg">₹73</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹20,356</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹14,315
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹6,041 &nbsp;|&nbsp; Out: ₹20,356 &nbsp;|&nbsp; Net: <strong style="color:var(--red)">₹-14,315</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Sunday, 7 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)">
+          Net: +₹107
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹910</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹95</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹1,005</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Personal Expense<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹740</td></tr><tr><td class="cb-narr">Bank adj — Personal expense</td><td class="cb-amt neg">₹158</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹898</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹107
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹1,005 &nbsp;|&nbsp; Out: ₹898 &nbsp;|&nbsp; Net: <strong style="color:var(--green)">+₹107</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Monday, 8 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">
+          Net: ₹-4,121
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹2,000</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹1,405</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹3,405</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">MAHAVEER MEDI-SALES PVT LTD<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹3,353</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr">SOLAIMALAI ENTERPRISES<span style="font-size:9px;color:var(--text3);margin-left:4px">[online]</span></td><td class="cb-amt neg">₹2,673</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹7,526</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹4,121
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹3,405 &nbsp;|&nbsp; Out: ₹7,526 &nbsp;|&nbsp; Net: <strong style="color:var(--red)">₹-4,121</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">Tuesday, 9 June 2026</div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">
+          Net: ₹-10,582
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹860</td></tr><tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹1,677</td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹2,537</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Vijaya<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹2,000</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Karpagam<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹700</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — TKM<span style="font-size:9px;color:var(--text3);margin-left:4px">[reserve]</span></td><td class="cb-amt neg">₹3,000</td></tr><tr><td class="cb-narr">SRI KAMATCHI AGENCIES<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹430</td></tr><tr><td class="cb-narr">Bank adj — Personal expense</td><td class="cb-amt neg">₹5,489</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹13,119</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹10,582
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹2,537 &nbsp;|&nbsp; Out: ₹13,119 &nbsp;|&nbsp; Net: <strong style="color:var(--red)">₹-10,582</strong>
+        </span>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:1rem;border-color:var(--accent);border-width:2px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:var(--accent)">Wednesday, 10 June 2026 <span style="font-size:10px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:3px;margin-left:6px">TODAY</span></div>
+        <div style="font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">
+          Net: ₹-10,200
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr" style="color:var(--text3)">No income</td><td></td></tr>
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹0</td>
+            </tr>
+          </tbody></table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            <tbody><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Vijaya<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹1,500</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Karpagam<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹700</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — Venkateshwara<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹2,000</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — TKM<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹3,000</td></tr><tr><td class="cb-narr"><span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>Finance — TKM<span style="font-size:9px;color:var(--text3);margin-left:4px">[cash]</span></td><td class="cb-amt neg">₹3,000</td></tr>
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹10,200</td>
+            </tr>
+          </tbody></table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:var(--amber-bg);border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:var(--amber)">
+          ⚠ Difference: ₹10,200
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹0 &nbsp;|&nbsp; Out: ₹10,200 &nbsp;|&nbsp; Net: <strong style="color:var(--red)">₹-10,200</strong>
+        </span>
+      </div>
+    </div></div>
+</div>
+
 <div class="section" id="tab-settings">
   <div class="card">
     <div class="card-title">Opening balances (set once)</div>
@@ -1880,7 +2328,7 @@ table.ledger tr:last-child td{border-bottom:none}
       <input type="number" id="target-amt-input" placeholder="e.g. 150000" min="0">
     </div>
     <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal('target-modal')">Cancel</button>
+      <button class="btn-secondary" onclick="closeModal(&#39;target-modal&#39;)">Cancel</button>
       <button class="btn-primary" onclick="saveTarget()">Save Target</button>
     </div>
   </div>
@@ -1921,7 +2369,7 @@ table.ledger tr:last-child td{border-bottom:none}
 <!-- ADD FINANCE MODAL -->
 <div class="modal-overlay" id="fin-modal">
   <div class="modal">
-    <div class="modal-title" id="fin-modal-title">Edit finance — KRISHNA</div>
+    <div class="modal-title" id="fin-modal-title">Edit finance — TKM</div>
     <div class="form-row c2">
       <div class="fg"><label>Collector name</label><input type="text" id="fm-name" placeholder="Person / company name"></div>
       <div class="fg"><label>Total amount borrowed (₹)</label><input type="number" id="fm-total" placeholder="100000"></div>
@@ -1939,8 +2387,8 @@ table.ledger tr:last-child td{border-bottom:none}
     </div>
     <div class="fg" style="margin-bottom:8px"><label>Already paid instalments</label><input type="number" id="fm-paid" placeholder="0" value="0"></div>
     <div class="fg"><label>Notes</label><input type="text" id="fm-notes" placeholder="Any notes"></div>
-    <input type="hidden" id="fm-hidden" value="true">
-    <input type="hidden" id="fm-edit-id" value="f1780578583654">
+    <input type="hidden" id="fm-hidden" value="false">
+    <input type="hidden" id="fm-edit-id" value="f1780671442457">
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closeModal(&#39;fin-modal&#39;)">Cancel</button>
       <button class="btn-primary" onclick="saveFinance()">Save</button>
@@ -1980,7 +2428,7 @@ table.ledger tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<div class="toast show" id="toast">Finance dropdown locked</div>
+<div class="toast" id="toast">Hidden section unlocked</div>
 
 <script>
 // ══════════════════════════════════════════════
@@ -2125,6 +2573,8 @@ function init() {
   document.getElementById('hdr-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('open-date-lbl').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('ledger-date').value = TODAY;
+  const cbMonthEl = document.getElementById('cb-month');
+  if(cbMonthEl) cbMonthEl.value = TODAY.slice(0,7);
   const invDateEl = document.getElementById('inv-date');
   if(invDateEl) invDateEl.value = TODAY;
   const dbBackDate = document.getElementById('db-back-date');
@@ -2553,13 +3003,70 @@ function addExpense() {
     if(s) s.outstanding = Math.max(0,(s.outstanding||0)-amt);
   }
 
-  // Update finance paid days if finance payment
+  // Update finance paid days if finance payment AND mark Weekly Ledger
   if(isFinance && finId) {
     const f = db.finances.find(x=>x.id===finId);
-    if(f) {
-      // Calculate days paid based on amount
+    if(f && f.daily > 0) {
+      // Calculate exact days paid based on amount
       const daysPaid = Math.round(amt / f.daily);
-      f.paidDays = (f.paidDays||0) + Math.max(1, daysPaid);
+      const daysToAdd = Math.max(1, daysPaid);
+      f.paidDays = (f.paidDays||0) + daysToAdd;
+
+      // Mark the correct number of days as paid in the Weekly Ledger
+      // Find the earliest unpaid date(s) for this finance and mark them paid
+      if(!db.wlState) db.wlState = {};
+      const allDates = [];
+      const now = new Date(TODAY);
+      // Look back 60 days and forward 60 days
+      for(let i = -60; i <= 60; i++) {
+        const d = new Date(now); d.setDate(d.getDate()+i);
+        allDates.push(d.toISOString().slice(0,10));
+      }
+      let marked = 0;
+      for(const dt of allDates) {
+        if(marked >= daysToAdd) break;
+        const k = dt + '_' + finId;
+        const existing = db.wlState[k];
+        // Skip Sunday if finance doesn't run on Sunday
+        const dow = new Date(dt).getDay();
+        if(dow === 0 && f.sunday !== 'yes') continue;
+        // Only mark if not already paid/moved
+        if(!existing || existing === 'unresolved') {
+          db.wlState[k] = 'paid';
+          marked++;
+        }
+      }
+    }
+  }
+
+  // Mark supplier payment in Weekly Ledger
+  if(supId && supId !== '__other__') {
+    if(!db.wlState) db.wlState = {};
+    const supKey = 'sup_' + supId;
+    // Find dates where this supplier has unpaid amounts and mark the closest one paid
+    const allDates = [];
+    const now = new Date(TODAY);
+    for(let i = -60; i <= 60; i++) {
+      const d = new Date(now); d.setDate(d.getDate()+i);
+      allDates.push(d.toISOString().slice(0,10));
+    }
+    for(const dt of allDates) {
+      const k = dt + '_' + supKey;
+      if(!db.wlState[k]) {
+        // Check if this supplier actually has an amount due on this date
+        let due = 0;
+        (db.invoices||[]).forEach(inv => {
+          if(inv.supId !== supId) return;
+          const s = db.suppliers.find(x=>x.id===supId);
+          if(!s) return;
+          const d2 = new Date(inv.date); d2.setDate(d2.getDate()+parseInt(s.credit||30));
+          if(s.fixedDay!==''&&s.fixedDay!==undefined){
+            const td=parseInt(s.fixedDay); while(d2.getDay()!==td) d2.setDate(d2.getDate()+1);
+          }
+          if(d2.toISOString().slice(0,10)===dt) due += inv.amount;
+        });
+        if(due > 0) { db.wlState[k] = 'paid'; break; }
+      }
     }
   }
 
@@ -3455,6 +3962,7 @@ function submitPIN() {
       document.getElementById('hidden-fin-section').style.display='block';
       switchTab('finances');
       renderFinanceSummary();
+      if(document.getElementById('tab-weekly-ledger').classList.contains('active')) renderWeeklyLedger();
       showToast('Hidden section unlocked');
     }
   } else {
@@ -3465,6 +3973,7 @@ function submitPIN() {
 function lockHidden() {
   hiddenUnlocked=false;
   document.getElementById('hidden-fin-section').style.display='none';
+  if(document.getElementById('tab-weekly-ledger').classList.contains('active')) renderWeeklyLedger();
   showToast('Hidden section locked');
 }
 function changePIN() {
@@ -3819,12 +4328,14 @@ function deleteInvestment(id) {
 }
 
 function switchTab(name) {
-  const names=['dashboard','opening','sales','expenses','closing','finances','suppliers','investments','ledger','settings'];
+  const names=['dashboard','opening','sales','expenses','closing','finances','suppliers','investments','ledger','weekly-ledger','cash-book','settings'];
   document.querySelectorAll('.ntab').forEach((t,i)=>t.classList.toggle('active',names[i]===name));
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   if(name==='dashboard') renderDashboard();
   if(name==='ledger') renderLedger();
+  if(name==='weekly-ledger') renderWeeklyLedger();
+  if(name==='cash-book') renderCashBook();
   if(name==='opening') { updateSystemBalances(); buildDenomTable('denom-body',true,false); buildDenomTable('reserve-denom-body',true,true); }
   if(name==='investments') { renderInvestments(); populateInvFinDropdown('res-topup-fin',_resFinUnlocked); populateInvFinDropdown('inv-fin',_invFinUnlocked); }
 }
@@ -4155,6 +4666,668 @@ function renderPaymentSchedule() {
 
 
 window.addEventListener('load',init);
+
+/* ═══════════════ WEEKLY LEDGER ═══════════════ */
+
+let wlDialog = null; // current dialog state
+
+// Build payee list live from db.finances and db.suppliers (chits excluded — covered under TKM)
+function wlBuildPayees() {
+  const payees = [];
+  db.finances.forEach(f => {
+    if(!f.start) return;
+    payees.push({ key:f.id, label:f.name+(f.hidden?' 🔒':''), daily:f.daily, hidden:f.hidden||false, sunday:f.sunday==='yes', isSupplier:false, isChit:false, completed:(f.paidDays||0)>=(f.totalDays||9999) });
+  });
+  db.suppliers && db.suppliers.forEach(s => {
+    if(!(db.invoices && db.invoices.some(inv=>inv.supId===s.id))) return;
+    payees.push({ key:'sup_'+s.id, label:s.name, daily:0, hidden:false, sunday:true, isSupplier:true, isChit:false, completed:false, supId:s.id, credit:parseInt(s.credit||30) });
+  });
+  return payees;
+}
+
+function wlSupplierDue(payee, dateStr) {
+  let due = 0;
+  db.invoices && db.invoices.forEach(inv => {
+    if(inv.supId !== payee.supId) return;
+    const d = new Date(inv.date); d.setDate(d.getDate()+payee.credit);
+    if(d.toISOString().slice(0,10) === dateStr) due += inv.amount;
+  });
+  return due;
+}
+
+function wlAmtForDate(payee, dateStr) {
+  if(payee.isSupplier) return wlSupplierDue(payee, dateStr);
+  const dow = new Date(dateStr).getDay();
+  if(!payee.sunday && dow===0) return 0;
+  if(payee.isChit && dow===0) return 0;
+  return payee.daily;
+}
+
+// Cell state: 'paid' | 'unresolved' | 'missed-stay' | 'moved-away' | 'moved-here' | 'pending' | 'empty'
+function wlCellState(payee, dateStr, scheduled) {
+  const k = dateStr+'_'+payee.key;
+  const s = (db.wlState||{})[k];
+  if(s) return s;
+  const amt = scheduled[dateStr] && scheduled[dateStr][payee.key];
+  if(!amt) return 'empty';
+  if(dateStr < TODAY) return 'unresolved';
+  return 'pending';
+}
+
+function wlGetState(dateStr, payeeKey) {
+  return (db.wlState||{})[dateStr+'_'+payeeKey] || null;
+}
+
+function wlSetState(dateStr, payeeKey, val) {
+  if(!db.wlState) db.wlState = {};
+  if(val === null) delete db.wlState[dateStr+'_'+payeeKey];
+  else db.wlState[dateStr+'_'+payeeKey] = val;
+  save();
+}
+
+// Dates: today through end of month
+function wlGetDates() {
+  const now = new Date(TODAY);
+  const year = now.getFullYear(), month = now.getMonth();
+  const lastDay = new Date(year,month+1,0).getDate();
+  const dates = [];
+  for(let d = now.getDate(); d <= lastDay; d++)
+    dates.push(new Date(year,month,d).toISOString().slice(0,10));
+  return dates;
+}
+
+// Past dates that need resolution — look back up to 60 days
+function wlPastDates() {
+  const now = new Date(TODAY);
+  const dates = [];
+  for(let i = 60; i >= 1; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+  return dates;
+}
+
+function wlUnresolved(payees, scheduled) {
+  const items = [];
+  wlPastDates().forEach(dt => {
+    payees.forEach(p => {
+      const amt = scheduled[dt] && scheduled[dt][p.key];
+      if(!amt) return;
+      const s = wlGetState(dt, p.key);
+      if(!s) items.push({p, dt, amt});
+    });
+  });
+  return items;
+}
+
+function wlFmt(n) { return n ? '₹'+Math.round(n).toLocaleString('en-IN') : '—'; }
+
+function wlDayLabel(dateStr) {
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(dateStr).getDay()];
+}
+
+function wlDateLabel(dateStr) {
+  return new Date(dateStr+'T00:00:00').toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+}
+
+// ── Dialog renderer ──
+function wlRenderDialog(payees, scheduled) {
+  if(!wlDialog) return '';
+  const d = wlDialog;
+  const amt = wlFmt(d.amt);
+  const dtLbl = wlDateLabel(d.dt);
+
+  let steps='', body='';
+
+  if(d.type==='missed') {
+    const rem = wlUnresolved(payees, scheduled);
+    const total = rem.length + (d.step>=1?1:0);
+    steps = `<div style="display:flex;gap:6px;align-items:center;margin-bottom:12px">
+      ${[1,2,3].map(i=>`<div style="width:8px;height:8px;border-radius:50%;background:${d.step>i?'var(--green)':d.step===i?'var(--accent)':'var(--border2)'}"></div>`).join('')}
+      <span style="font-size:11px;color:var(--text3)">Step ${Math.min(d.step,3)} of 3 &nbsp;·&nbsp; ${rem.length} more after this</span>
+    </div>`;
+
+    const entryBox = `<div style="background:var(--surface2);border-radius:var(--rs);padding:8px 12px;margin-bottom:14px;font-size:12px">
+      <strong>${d.p.label}</strong> &nbsp; ${amt} &nbsp; <span style="color:var(--text3)">${dtLbl}</span>
+    </div>`;
+
+    if(d.step===1) {
+      body = entryBox+`<div style="font-size:12px;margin-bottom:12px;color:var(--text2)">Was this payment actually made on <strong>${dtLbl}</strong>?</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" onclick="wlDialogAction('paid-yes')">Yes, it was paid</button>
+          <button class="btn-secondary" onclick="wlDialogAction('paid-no')">No, it was not paid</button>
+        </div>`;
+    } else if(d.step===2 && d.wasPaid) {
+      body = entryBox+`<div style="font-size:12px;margin-bottom:12px;color:var(--text2)">Select how it was paid — this adjusts your balances:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <button class="btn-secondary" onclick="wlDialogAction('mode','cash')">Cash</button>
+          <button class="btn-secondary" onclick="wlDialogAction('mode','bank')">Account / Bank</button>
+          <button class="btn-secondary" onclick="wlDialogAction('mode','reserve')">Cash Reserve</button>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+          <button class="btn-secondary" style="font-size:11px" onclick="wlDialogAction('mode','done')">Already updated balances — just mark paid</button>
+        </div>`;
+    } else if(d.step===2 && !d.wasPaid) {
+      body = entryBox+`<div style="font-size:12px;margin-bottom:12px;color:var(--text2)">Do you want to move this payment to a future date?</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-primary" onclick="wlDialogAction('move-yes')">Yes, reschedule it</button>
+          <button class="btn-secondary" onclick="wlDialogAction('move-no')">No, keep it here (mark unpaid)</button>
+        </div>`;
+    } else if(d.step===3 && d.moving) {
+      const minDate = TODAY;
+      body = entryBox+`<div style="font-size:12px;margin-bottom:10px;color:var(--text2)">Pick the date to reschedule this payment to:</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input type="date" id="wl-move-date" min="${minDate}" value="${minDate}" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--rs);font-size:12px;background:var(--bg);color:var(--text)">
+          <button class="btn-primary" onclick="wlConfirmMove()">Confirm move</button>
+          <button class="btn-secondary" onclick="wlDialogAction('move-cancel')">Cancel</button>
+        </div>`;
+    }
+  } else if(d.type==='pending') {
+    body = `<div style="background:var(--surface2);border-radius:var(--rs);padding:8px 12px;margin-bottom:14px;font-size:12px">
+        <strong>${d.p.label}</strong> &nbsp; ${amt} &nbsp; <span style="color:var(--text3)">${dtLbl}</span>
+      </div>
+      <div style="font-size:12px;margin-bottom:12px;color:var(--text2)">Payment mode:</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="wlDialogAction('pay','cash')">Cash</button>
+        <button class="btn-secondary" onclick="wlDialogAction('pay','bank')">Account / Bank</button>
+        <button class="btn-secondary" onclick="wlDialogAction('pay','reserve')">Cash Reserve</button>
+      </div>`;
+  } else if(d.type==='undo') {
+    body = `<div style="background:var(--surface2);border-radius:var(--rs);padding:8px 12px;margin-bottom:14px;font-size:12px">
+        <strong>${d.p.label}</strong> &nbsp; ${amt} &nbsp; <span style="color:var(--text3)">${dtLbl}</span>
+      </div>
+      <div style="font-size:12px;margin-bottom:12px;color:var(--text2)">This will mark the entry as pending again.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-primary" onclick="wlDialogAction('undo-confirm')">Undo payment</button>
+        <button class="btn-secondary" onclick="wlCloseDialog()">Cancel</button>
+      </div>`;
+  }
+
+  return `<div style="background:rgba(0,0,0,0.12);border-radius:var(--rs);padding:20px;display:flex;align-items:center;justify-content:center;min-height:200px;margin-bottom:12px">
+    <div style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);padding:20px 22px;max-width:420px;width:100%">
+      ${steps}
+      <div style="font-size:14px;font-weight:600;margin-bottom:4px">${d.type==='missed'?'Missed payment':'Mark as paid'} — ${d.p.label}</div>
+      ${body}
+    </div>
+  </div>`;
+}
+
+function wlDialogAction(action, extra) {
+  if(!wlDialog) return;
+  const d = wlDialog;
+  const k = d.dt+'_'+d.p.key;
+
+  if(d.type==='missed') {
+    if(action==='paid-yes') { d.wasPaid=true; d.step=2; }
+    else if(action==='paid-no') { d.wasPaid=false; d.step=2; }
+    else if(action==='mode') {
+      wlSetState(d.dt, d.p.key, 'paid');
+      if(extra!=='done') {
+        if(!db.balances) db.balances={cash:0,bank:0,reserve:0};
+        if(extra==='cash') db.balances.cash = Math.max(0,(db.balances.cash||0)-d.amt);
+        else if(extra==='bank') db.balances.bank = Math.max(0,(db.balances.bank||0)-d.amt);
+        else if(extra==='reserve') db.balances.reserve = Math.max(0,(db.balances.reserve||0)-d.amt);
+      }
+      // Sync paidDays on finance object
+      if(!d.p.isSupplier && d.p.key) {
+        const fin = db.finances.find(f=>f.id===d.p.key);
+        if(fin) fin.paidDays = (fin.paidDays||0) + 1;
+      }
+      // Sync supplier outstanding
+      if(d.p.isSupplier && d.p.supId) {
+        const sup = db.suppliers.find(s=>s.id===d.p.supId);
+        if(sup) sup.outstanding = Math.max(0,(sup.outstanding||0)-d.amt);
+      }
+      // Add entry to ledger for audit trail
+      db.entries.push({
+        id: Date.now(), type: d.p.isSupplier ? 'expense' : 'finance',
+        mode: extra==='done' ? 'cash' : (extra||'cash'),
+        party: d.p.isSupplier ? d.p.label : 'Finance — '+d.p.label,
+        amount: d.amt, time: nowTime(), date: d.dt,
+        finId: d.p.isSupplier ? '' : d.p.key,
+        supId: d.p.isSupplier ? d.p.supId : '',
+        hidden: d.p.hidden||false
+      });
+      save();
+      wlAdvanceDialog();
+    }
+    else if(action==='move-yes') { d.moving=true; d.step=3; }
+    else if(action==='move-no') { wlSetState(d.dt, d.p.key, 'missed-stay'); wlAdvanceDialog(); }
+    else if(action==='move-cancel') { d.moving=false; d.step=2; }
+  }
+  else if(d.type==='pending') {
+    if(action==='pay') {
+      wlSetState(d.dt, d.p.key, 'paid');
+      if(extra!=='done') {
+        if(!db.balances) db.balances={cash:0,bank:0,reserve:0};
+        if(extra==='cash') db.balances.cash = Math.max(0,(db.balances.cash||0)-d.amt);
+        else if(extra==='bank') db.balances.bank = Math.max(0,(db.balances.bank||0)-d.amt);
+        else if(extra==='reserve') db.balances.reserve = Math.max(0,(db.balances.reserve||0)-d.amt);
+      }
+      // Sync paidDays on finance object
+      if(!d.p.isSupplier && d.p.key) {
+        const fin = db.finances.find(f=>f.id===d.p.key);
+        if(fin) fin.paidDays = (fin.paidDays||0) + 1;
+      }
+      // Sync supplier outstanding
+      if(d.p.isSupplier && d.p.supId) {
+        const sup = db.suppliers.find(s=>s.id===d.p.supId);
+        if(sup) sup.outstanding = Math.max(0,(sup.outstanding||0)-d.amt);
+      }
+      // Add entry to ledger for audit trail
+      db.entries.push({
+        id: Date.now(), type: d.p.isSupplier ? 'expense' : 'finance',
+        mode: extra==='done' ? 'cash' : (extra||'cash'),
+        party: d.p.isSupplier ? d.p.label : 'Finance — '+d.p.label,
+        amount: d.amt, time: nowTime(), date: d.dt,
+        finId: d.p.isSupplier ? '' : d.p.key,
+        supId: d.p.isSupplier ? d.p.supId : '',
+        hidden: d.p.hidden||false
+      });
+      save();
+      wlCloseDialog();
+    }
+  }
+  else if(d.type==='undo') {
+    if(action==='undo-confirm') {
+      wlSetState(d.dt, d.p.key, null);
+      // Reverse paidDays on finance object
+      if(!d.p.isSupplier && d.p.key) {
+        const fin = db.finances.find(f=>f.id===d.p.key);
+        if(fin) fin.paidDays = Math.max(0,(fin.paidDays||0) - 1);
+      }
+      // Reverse supplier outstanding
+      if(d.p.isSupplier && d.p.supId) {
+        const sup = db.suppliers.find(s=>s.id===d.p.supId);
+        if(sup) sup.outstanding = (sup.outstanding||0) + d.amt;
+      }
+      wlCloseDialog();
+      return;
+    }
+  }
+  renderWeeklyLedger();
+}
+
+function wlConfirmMove() {
+  const val = document.getElementById('wl-move-date') && document.getElementById('wl-move-date').value;
+  if(!val || !wlDialog) return;
+  const d = wlDialog;
+  // Store: original date cleared, target date gets a 'moved-here' marker
+  wlSetState(d.dt, d.p.key, 'moved-away');
+  // Store move-to info so target date knows to show this payee
+  if(!db.wlMoves) db.wlMoves = [];
+  db.wlMoves.push({ fromDt: d.dt, toDt: val, payeeKey: d.p.key, amt: d.amt });
+  save();
+  wlAdvanceDialog();
+  renderWeeklyLedger();
+}
+
+function wlAdvanceDialog() {
+  const payees = wlBuildPayees();
+  const allDates = [...wlPastDates(), ...wlGetDates()];
+  const scheduled = {};
+  allDates.forEach(dt => {
+    scheduled[dt] = {};
+    payees.forEach(p => { scheduled[dt][p.key] = wlAmtForDate(p,dt); });
+  });
+  const rem = wlUnresolved(payees, scheduled);
+  if(rem.length) {
+    const {p, dt, amt} = rem[0];
+    wlDialog = { type:'missed', p, dt, amt, step:1 };
+  } else {
+    wlDialog = null;
+  }
+}
+
+function wlCloseDialog() { wlDialog = null; renderWeeklyLedger(); }
+
+function wlOpenDialog(payeeKey, dateStr) {
+  const payees = wlBuildPayees();
+  const p = payees.find(x=>x.key===payeeKey);
+  if(!p) return;
+  const allDates = [...wlPastDates(), ...wlGetDates()];
+  const scheduled = {};
+  allDates.forEach(dt => {
+    scheduled[dt]={};
+    payees.forEach(px=>{scheduled[dt][px.key]=wlAmtForDate(px,dt);});
+  });
+  const amt = wlAmtForDate(p, dateStr);
+  const st = wlCellState(p, dateStr, scheduled);
+
+  if(dateStr < TODAY && st==='unresolved') {
+    wlDialog = { type:'missed', p, dt:dateStr, amt, step:1 };
+  } else if(st==='paid') {
+    wlDialog = { type:'undo', p, dt:dateStr, amt };
+  } else if(st==='pending' || st==='moved-here') {
+    const movedAmt = wlMovedHereAmt(payeeKey, dateStr) || amt;
+    wlDialog = { type:'pending', p, dt:dateStr, amt:movedAmt };
+  }
+  renderWeeklyLedger();
+}
+
+function wlMovedHereAmt(payeeKey, dateStr) {
+  const m = (db.wlMoves||[]).find(x=>x.toDt===dateStr&&x.payeeKey===payeeKey);
+  return m ? m.amt : 0;
+}
+
+function wlOpenMissedReview() {
+  wlAdvanceDialog();
+  renderWeeklyLedger();
+}
+
+function renderWeeklyLedger() {
+  const payees  = wlBuildPayees();
+  const fwdDates = wlGetDates();
+  const pastDates = wlPastDates();
+  const allDates  = [...pastDates, ...fwdDates];
+
+  // Build schedule for all dates (past + forward)
+  const scheduled = {};
+  allDates.forEach(dt => {
+    scheduled[dt] = {};
+    payees.forEach(p => {
+      let amt = wlAmtForDate(p, dt);
+      // Check if a move brings extra amount here
+      (db.wlMoves||[]).forEach(m => {
+        if(m.toDt===dt && m.payeeKey===p.key) amt += m.amt;
+      });
+      scheduled[dt][p.key] = amt;
+    });
+  });
+
+  const unresolvedList = wlUnresolved(payees, scheduled);
+
+  // Balances
+  const cash    = db.balances.cash    || 0;
+  const bank    = db.balances.bank    || 0;
+  const reserve = db.balances.reserve || 0;
+  const totalAvail = cash + bank + reserve;
+
+  // Monthly remaining (forward dates only, unpaid)
+  let monthTotal=0, monthPaid=0;
+  fwdDates.forEach(dt => {
+    payees.filter(p=>!p.completed).forEach(p => {
+      const amt = scheduled[dt][p.key];
+      if(!amt) return;
+      monthTotal += amt;
+      const st = wlCellState(p, dt, scheduled);
+      if(st==='paid') monthPaid += amt;
+    });
+  });
+  const monthRem = monthTotal - monthPaid;
+  const afterAll = totalAvail - monthRem;
+
+  // Update summary cards
+  document.getElementById('wl-month-label').textContent =
+    new Date(TODAY).toLocaleString('en-IN',{month:'long',year:'numeric'});
+  document.getElementById('wl-cash-val').textContent    = '₹'+cash.toLocaleString('en-IN');
+  document.getElementById('wl-bank-val').textContent    = '₹'+bank.toLocaleString('en-IN');
+  document.getElementById('wl-reserve-val').textContent = '₹'+reserve.toLocaleString('en-IN');
+  document.getElementById('wl-total-avail').textContent = '₹'+totalAvail.toLocaleString('en-IN');
+
+  const reqEl = document.getElementById('wl-req-total');
+  reqEl.textContent = '₹'+monthRem.toLocaleString('en-IN');
+  reqEl.className   = 'wl-req-val '+(monthRem>totalAvail?'neg':'pos');
+  const hiddenCount = payees.filter(p=>p.hidden&&!p.completed).length;
+  document.getElementById('wl-req-note').textContent =
+    'Total this month: ₹'+monthTotal.toLocaleString('en-IN')+' | Paid: ₹'+monthPaid.toLocaleString('en-IN') +
+    (!hiddenUnlocked && hiddenCount ? ' | Includes 🔒 hidden' : '');
+
+  const afterEl = document.getElementById('wl-after-all');
+  afterEl.textContent = '₹'+Math.abs(afterAll).toLocaleString('en-IN')+(afterAll<0?' deficit':' surplus');
+  afterEl.className   = 'wl-bc-val '+(afterAll<0?'neg':'pos');
+
+  // Missed banner
+  const bannerEl = document.getElementById('wl-missed-banner');
+  if(bannerEl) {
+    if(unresolvedList.length && !wlDialog) {
+      bannerEl.style.display='flex';
+      bannerEl.querySelector('.wl-banner-txt').textContent =
+        unresolvedList.length+' missed payment'+(unresolvedList.length>1?'s':'')+' need your attention';
+    } else {
+      bannerEl.style.display='none';
+    }
+  }
+
+  // Dialog
+  const dialogEl = document.getElementById('wl-dialog-area');
+  if(dialogEl) dialogEl.innerHTML = wlRenderDialog(payees, scheduled);
+
+  // Table — starts from today
+  const t = document.getElementById('wl-table');
+  let html = '<thead><tr><th class="row-lbl-hdr">Payee</th>';
+  fwdDates.forEach(dt => {
+    const isTod = dt===TODAY;
+    const dd = parseInt(dt.slice(8));
+    html += `<th class="${isTod?'today-hdr':''}">${dd}<br><span style="font-weight:400;font-size:10px">${wlDayLabel(dt)}</span></th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  if(!payees.length) {
+    html += `<tr><td class="row-lbl" colspan="${fwdDates.length+1}" style="text-align:center;padding:16px;color:var(--text3)">No active finances or suppliers. Add them in the Finances &amp; Suppliers tabs.</td></tr>`;
+  } else {
+    payees.filter(p=>!p.completed).forEach(p => {
+      // Hide entire row for hidden payees when locked
+      if(p.hidden && !hiddenUnlocked) return;
+      html += `<tr><td class="row-lbl">${p.label}</td>`;
+      fwdDates.forEach(dt => {
+        const isTod = dt===TODAY;
+        const tc    = isTod?' today-col':'';
+        const amt   = scheduled[dt][p.key];
+        const st    = wlCellState(p, dt, scheduled);
+
+        if(st==='moved-away') {
+          html += `<td class="c-moved${tc}" onclick="wlOpenDialog('${p.key}','${dt}')">moved</td>`;
+        } else if(st==='moved-here') {
+          html += `<td class="c-moved${tc}" onclick="wlOpenDialog('${p.key}','${dt}')">${wlFmt(amt)} ↗</td>`;
+        } else if(st==='paid') {
+          html += `<td class="paid-cell${tc}" onclick="wlOpenDialog('${p.key}','${dt}')">✓ paid</td>`;
+        } else if(!amt) {
+          html += `<td class="c-empty${tc}">—</td>`;
+        } else {
+          html += `<td class="pending-cell${tc}" onclick="wlOpenDialog('${p.key}','${dt}')">${wlFmt(amt)}</td>`;
+        }
+      });
+      html += '</tr>';
+    });
+  }
+
+  // Daily total
+  html += '<tr class="total-row"><td class="row-lbl">Daily total</td>';
+  fwdDates.forEach(dt => {
+    const isTod=dt===TODAY; let tot=0;
+    payees.filter(p=>!p.completed).forEach(p => {
+      const st=wlCellState(p,dt,scheduled);
+      if(st==='paid'||st==='moved-away') return;
+      tot += scheduled[dt][p.key]||0;
+    });
+    html += `<td class="${isTod?'today-col':''}">${tot?wlFmt(tot):'—'}</td>`;
+  });
+  html += '</tr>';
+
+  // Running balance
+  let runBal = totalAvail;
+  html += '<tr class="avail-row"><td class="row-lbl">Balance after</td>';
+  fwdDates.forEach(dt => {
+    payees.filter(p=>!p.completed).forEach(p => {
+      const st=wlCellState(p,dt,scheduled);
+      if(st==='paid'||st==='moved-away') return;
+      runBal -= scheduled[dt][p.key]||0;
+    });
+    const isTod=dt===TODAY;
+    const cls=runBal<0?'neg':'pos';
+    html += `<td class="${cls}${isTod?' today-col':''}">${wlFmt(Math.abs(Math.round(runBal)))}${runBal<0?' ▼':' ▲'}</td>`;
+  });
+  html += '</tr></tbody>';
+  t.innerHTML = html;
+
+  // Scroll to today (first column)
+  setTimeout(()=>{ const w=document.querySelector('.wl-tbl-wrap'); if(w) w.scrollLeft=0; },60);
+}
+
+// Hook into switchTab so ledger re-renders on open — patched after init
+
+// ══════════════════════════════════════════════
+// CASH BOOK
+// ══════════════════════════════════════════════
+function cbGoToday() {
+  const inp = document.getElementById('cb-month');
+  if(inp) inp.value = TODAY.slice(0,7);
+  renderCashBook();
+}
+
+function renderCashBook() {
+  const inp = document.getElementById('cb-month');
+  if(!inp) return;
+  if(!inp.value) inp.value = TODAY.slice(0,7);
+  const month = inp.value; // YYYY-MM
+
+  const container = document.getElementById('cb-days-container');
+  const metricsEl = document.getElementById('cb-month-metrics');
+  if(!container) return;
+
+  // Get all entries for the month
+  const show = hiddenUnlocked ? db.entries : db.entries.filter(e=>!e.hidden);
+  const monthEntries = show.filter(e => e.date && e.date.startsWith(month));
+
+  // Get all unique dates in the month that have entries, plus today if in this month
+  const datesSet = new Set(monthEntries.map(e=>e.date));
+  if(TODAY.startsWith(month)) datesSet.add(TODAY);
+
+  const dates = Array.from(datesSet).sort();
+
+  if(!dates.length) {
+    container.innerHTML = '<div class="card"><div class="empty">No entries for this month yet.</div></div>';
+    if(metricsEl) metricsEl.innerHTML = '';
+    return;
+  }
+
+  // Month totals
+  let monthSales = 0, monthExp = 0, monthFinance = 0;
+  monthEntries.forEach(e => {
+    if(e.type==='sale') monthSales += e.amount;
+    else if(e.type==='expense') monthExp += e.amount;
+    else if(e.type==='finance') monthFinance += e.amount;
+  });
+
+  if(metricsEl) {
+    metricsEl.innerHTML = `
+      <div class="metric"><div class="metric-lbl">Month Sales</div><div class="metric-val green">₹${monthSales.toLocaleString('en-IN')}</div></div>
+      <div class="metric"><div class="metric-lbl">Month Expenses</div><div class="metric-val red">₹${monthExp.toLocaleString('en-IN')}</div></div>
+      <div class="metric"><div class="metric-lbl">Finance Paid</div><div class="metric-val amber">₹${monthFinance.toLocaleString('en-IN')}</div></div>
+      <div class="metric"><div class="metric-lbl">Net</div><div class="metric-val ${monthSales>=(monthExp+monthFinance)?'green':'red'}">₹${(monthSales-monthExp-monthFinance).toLocaleString('en-IN')}</div></div>
+    `;
+  }
+
+  // Build running balance — start from db balances and work backwards to month start
+  // We'll compute each day's opening from entries
+  let html = '';
+
+  dates.forEach(dateStr => {
+    const dayEntries = show.filter(e=>e.date===dateStr);
+    const daySales = dayEntries.filter(e=>e.type==='sale');
+    const dayExpenses = dayEntries.filter(e=>e.type==='expense'||e.type==='finance'||e.type==='investment');
+    const dayTransfers = dayEntries.filter(e=>e.type==='transfer');
+    const dayAdj = dayEntries.filter(e=>e.type==='adjustment');
+
+    const totalIn = daySales.reduce((s,e)=>s+e.amount,0);
+    const totalOut = [...dayExpenses,...dayAdj.filter(e=>e.sign==='-')].reduce((s,e)=>s+e.amount,0);
+    const adjIn = dayAdj.filter(e=>e.sign==='+').reduce((s,e)=>s+e.amount,0);
+
+    const dateObj = new Date(dateStr+'T00:00:00');
+    const dayLabel = dateObj.toLocaleDateString('en-IN',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    const isToday = dateStr===TODAY;
+
+    // Left side rows (Income / To)
+    let leftRows = '';
+    let leftTotal = 0;
+
+    const cashSales = daySales.filter(e=>e.mode==='cash').reduce((s,e)=>s+e.amount,0);
+    const onlineSales = daySales.filter(e=>e.mode==='online').reduce((s,e)=>s+e.amount,0);
+
+    if(cashSales) {
+      leftRows += `<tr><td class="cb-narr">Sales — Cash</td><td class="cb-amt pos">₹${cashSales.toLocaleString('en-IN')}</td></tr>`;
+      leftTotal += cashSales;
+    }
+    if(onlineSales) {
+      leftRows += `<tr><td class="cb-narr">Sales — Online/GPay</td><td class="cb-amt pos">₹${onlineSales.toLocaleString('en-IN')}</td></tr>`;
+      leftTotal += onlineSales;
+    }
+    dayTransfers.forEach(e => {
+      leftRows += `<tr><td class="cb-narr">Transfer — ${e.party}</td><td class="cb-amt" style="color:var(--amber)">₹${e.amount.toLocaleString('en-IN')}</td></tr>`;
+    });
+    dayAdj.filter(e=>e.sign==='+').forEach(e => {
+      leftRows += `<tr><td class="cb-narr">${e.party}</td><td class="cb-amt pos">₹${e.amount.toLocaleString('en-IN')}</td></tr>`;
+      leftTotal += e.amount;
+    });
+
+    // Right side rows (Expenses / By)
+    let rightRows = '';
+    let rightTotal = 0;
+
+    dayExpenses.forEach(e => {
+      const badge = e.type==='finance' ? `<span class="badge b-due" style="font-size:9px;margin-right:4px">Fin</span>`
+                  : e.type==='investment' ? `<span class="badge b-chit" style="font-size:9px;margin-right:4px">Inv</span>` : '';
+      const modeTag = e.mode ? `<span style="font-size:9px;color:var(--text3);margin-left:4px">[${e.mode}]</span>` : '';
+      rightRows += `<tr><td class="cb-narr">${badge}${e.party}${modeTag}</td><td class="cb-amt neg">₹${e.amount.toLocaleString('en-IN')}</td></tr>`;
+      rightTotal += e.amount;
+    });
+    dayAdj.filter(e=>e.sign==='-').forEach(e => {
+      rightRows += `<tr><td class="cb-narr">${e.party}</td><td class="cb-amt neg">₹${e.amount.toLocaleString('en-IN')}</td></tr>`;
+      rightTotal += e.amount;
+    });
+
+    const net = leftTotal - rightTotal;
+    const balanced = Math.abs(net) < 1;
+
+    html += `
+    <div class="card" style="margin-bottom:1rem;${isToday?'border-color:var(--accent);border-width:2px':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+        <div style="font-size:13px;font-weight:600;color:${isToday?'var(--accent)':'var(--text)'}">${dayLabel}${isToday?' <span style="font-size:10px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:3px;margin-left:6px">TODAY</span>':''}</div>
+        <div style="font-size:12px;font-weight:600;color:${net>=0?'var(--green)':'var(--red)'};font-family:var(--mono)">
+          Net: ${net>=0?'+':''}₹${net.toLocaleString('en-IN')}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <!-- LEFT: Income -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--green-bg)">To (Income)</div>
+          <table style="width:100%;border-collapse:collapse">
+            ${leftRows || '<tr><td class="cb-narr" style="color:var(--text3)">No income</td><td></td></tr>'}
+            <tr style="background:var(--green-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--green)">Total In</td>
+              <td class="cb-amt" style="color:var(--green)">₹${leftTotal.toLocaleString('en-IN')}</td>
+            </tr>
+          </table>
+        </div>
+        <!-- RIGHT: Expenses -->
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid var(--red-bg)">By (Outgoing)</div>
+          <table style="width:100%;border-collapse:collapse">
+            ${rightRows || '<tr><td class="cb-narr" style="color:var(--text3)">No expenses</td><td></td></tr>'}
+            <tr style="background:var(--red-bg);font-weight:600">
+              <td class="cb-narr" style="color:var(--red)">Total Out</td>
+              <td class="cb-amt" style="color:var(--red)">₹${rightTotal.toLocaleString('en-IN')}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <!-- Balance row -->
+      <div style="margin-top:10px;padding:8px 12px;background:${balanced?'var(--green-bg)':'var(--amber-bg)'};border-radius:var(--rs);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;font-weight:600;color:${balanced?'var(--green)':'var(--amber)'}">
+          ${balanced ? '✓ Balanced' : '⚠ Difference: ₹'+Math.abs(net).toLocaleString('en-IN')}
+        </span>
+        <span style="font-size:12px;font-family:var(--mono);color:var(--text2)">
+          In: ₹${leftTotal.toLocaleString('en-IN')} &nbsp;|&nbsp; Out: ₹${rightTotal.toLocaleString('en-IN')} &nbsp;|&nbsp; Net: <strong style="color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}₹${net.toLocaleString('en-IN')}</strong>
+        </span>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
 </script>
 
 
