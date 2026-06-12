@@ -2482,16 +2482,14 @@ let _syncTimer = null;
 async function syncToSheets(data) {
   try {
     setSyncStatus('saving', 'Syncing…');
-    const resp = await fetch(SYNC_URL, {
+    // mode:'no-cors' — Apps Script accepts the POST but its response
+    // lacks CORS headers; we send without reading the reply.
+    await fetch(SYNC_URL, {
       method: 'POST',
+      mode: 'no-cors',
       body: JSON.stringify({ action: 'set', key: 'pharma_db', value: JSON.stringify(data) })
     });
-    const result = await resp.json();
-    if(result.status === 'ok') {
-      setSyncStatus('ok', 'Synced ☁️');
-    } else {
-      setSyncStatus('err', 'Sync error');
-    }
+    setSyncStatus('ok', 'Synced ☁️');
   } catch(e) {
     setSyncStatus('err', 'Offline');
   }
